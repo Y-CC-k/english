@@ -16,6 +16,7 @@ export default function Leaderboard() {
   const [grade, setGrade] = useState("");
   const [week, setWeek] = useState("");
   const [bWeeks, setBWeeks] = useState<number[]>([]);
+  const [bType, setBType] = useState("");
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,6 +30,7 @@ export default function Leaderboard() {
         let query = sb.from("scores").select("name, grade, week, qtype, score");
         if (grade) query = query.eq("grade", Number(grade));
         if (week) query = query.eq("week", Number(week));
+        if (bType) query = query.eq("qtype", bType);
         query = query.order("score", { ascending: false }).order("created_at", { ascending: false }).limit(10);
         const { data, error } = await query;
         if (!alive) return;
@@ -48,7 +50,7 @@ export default function Leaderboard() {
     return () => {
       alive = false;
     };
-  }, [grade, week]);
+  }, [grade, week, bType]);
 
   return (
     <div className="lb">
@@ -65,6 +67,11 @@ export default function Leaderboard() {
           <select value={week} disabled={!grade} onChange={(e) => setWeek(e.target.value)}>
             <option value="">全部週次</option>
             {bWeeks.map((n) => <option key={n} value={n}>第 {n} 週</option>)}
+          </select>
+          <select value={bType} onChange={(e) => setBType(e.target.value)}>
+            <option value="">全部題型</option>
+            <option value="listen">🎧 聽音選義</option>
+            <option value="wordpick">🔍 看義選詞</option>
           </select>
         </div>
       </div>
