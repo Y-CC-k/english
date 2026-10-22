@@ -1,0 +1,19 @@
+.battle-container {
+  display: flex; flex-direction: column; height: 90vh;
+  max-width: 480px; margin: 0 auto; background: #1a1a2e; color: white;
+  border-radius: 12px; overflow: hidden; position: relative;
+  font-family: sans-serif;
+}
+.hud { height: 15%; padding: 15px; background: rgba(0,0,0,0.3); display: flex; justify-content: space-between; font-size: 0.9rem; }
+.hp-bar { width: 100%; height: 10px; background: #333; border-radius: 5px; margin-top: 5px; }
+.hp-fill { height: 100%; transition: width 0.3s ease; background: #ff4757; }
+.stage { height: 45%; display: flex; align-items: center; justify-content: center; position: relative; }
+.monster { font-size: 80px; animation: float 3s infinite ease-in-out; }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+.damage-text { position: absolute; top: 20%; color: #ffd700; font-weight: bold; font-size: 32px; animation: floatUp 0.8s forwards; pointer-events: none; }
+@keyframes floatUp { to { transform: translateY(-50px); opacity: 0; } }
+.shake { animation: shake 0.3s; }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+.actions { height: 40%; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: #16213e; }
+.btn-act { padding: 15px; background: #e94560; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; }
+.result-screen { position: absolute; top:0; left:0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; }

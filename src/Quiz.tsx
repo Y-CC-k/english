@@ -79,7 +79,14 @@ function unwrap<T>(result: { data: T[] | null; error: { message: string } | null
   return result.data ?? [];
 }
 
-export default function Quiz({ onBack, guest, accountName, teacher, initialBoard }: { onBack: () => void; guest?: boolean; accountName?: string; teacher?: boolean; initialBoard?: boolean }) {
+export default function Quiz({ onBack, guest, accountName, teacher, initialBoard, onStartBattle }: { 
+  onBack: () => void; 
+  guest?: boolean; 
+  accountName?: string; 
+  teacher?: boolean; 
+  initialBoard?: boolean;
+  onStartBattle: (grade: number, week: number) => void;
+}) {
   const [phase, setPhase] = useState<Phase>(initialBoard ? "board" : "setup");
   // 註冊者：姓名預設其登入帳號（可改）；訪客：沿用這台裝置最後輸入的暱稱
   const [name, setName] = useState(() => accountName ?? localStorage.getItem(NAME_KEY) ?? "");
@@ -587,7 +594,7 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
               <div className="qz-table-wrap">
                 <table className="qz-table">
                   <thead>
-                    <tr><th>時間</th><th>姓名</th><th>年級</th><th>週次</th><th>題型</th><th>分數</th><th>IP</th></tr>
+                    <tr><th>時間</th><th>姓名</th><th>年級</th><th>週次</th><th>題型</th><th>分數</th><th>IP</th><th>副本</th></tr>
                   </thead>
                   <tbody>
                     {teacherRows.map((r, i) => (
@@ -599,6 +606,9 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
                         <td>{r.qtype ? QTYPE_LABEL[r.qtype] ?? r.qtype : "—"}</td>
                         <td className="num">{r.score}</td>
                         <td className="num">{r.ip ?? "—"}</td>
+                        <td>
+                          <button className="qz-ghost-btn" onClick={() => onStartBattle(r.grade, r.week)}>⚔️ 挑戰</button>
+                        </td>
                       </tr>
                     ))}
                     {teacherRows.length === 0 && !loading && (

@@ -6,12 +6,14 @@ import AuthForms from "./AuthForms";
 import Leaderboard from "./Leaderboard";
 import WordStudy from "./WordStudy";
 import Quiz from "./Quiz";
+import Battle from "./Battle";
 
 /** 訪客模式共用帳號（Dashboard 手動建立；成績以暱稱記錄；密碼由使用者登入時輸入） */
 const GUEST_EMAIL = "klnes@stu.klnes.tc.edu.tw";
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
+  const [battleParams, setBattleParams] = useState<{ grade: number, week: number } | null>(null);
   const [ready, setReady] = useState(false);
   const [showWords, setShowWords] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
@@ -93,6 +95,17 @@ export default function App() {
 
   // 已登入
   if (session) {
+    if (battleParams) {
+      return (
+        <main>
+          <Battle 
+            grade={battleParams.grade} 
+            week={battleParams.week} 
+            onBack={() => setBattleParams(null)} 
+          />
+        </main>
+      );
+    }
     if (showQuiz) {
       return (
         <main>
@@ -102,6 +115,7 @@ export default function App() {
             accountName={guestUser ? undefined : (session.user.email ?? undefined)}
             teacher={!guestUser && role === 1}
             initialBoard={quizBoard}
+            onStartBattle={(g, w) => setBattleParams({ grade: g, week: w })}
           />
         </main>
       );
