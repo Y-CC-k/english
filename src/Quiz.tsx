@@ -40,12 +40,19 @@ interface ScoreRow {
 
 const QTYPE_LABEL: Record<string, string> = { listen: "🎧 聽音", wordpick: "🔍 看義" };
 
+/** ISO 時間 →「10/22 14:30」樣式（含日期與時間） */
+function fmtDateTime(iso: string): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleString("zh-TW", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false });
+}
+
 interface BoardSummary {
   name: string;
   grade: number;
   attempts: number;
   best: number;
   average: number;
+  lastAt: string; // 最後一次考試時間（ISO）
 }
 
 const GRADES = [
@@ -94,6 +101,7 @@ export default function Quiz({ onBack, guest, accountName }: { onBack: () => voi
   const detailRef = useRef<DetailItem[]>([]); // 存檔用（state 更新有 race，ref 即時）
   const [score, setScore] = useState(0);
   const [saveErr, setSaveErr] = useState("");
+  const [finishAt, setFinishAt] = useState(""); // 本次交卷時間（顯示在結果頁）
 
   // 成績板
   const [summary, setSummary] = useState<BoardSummary[]>([]);
@@ -102,7 +110,7 @@ export default function Quiz({ onBack, guest, accountName }: { onBack: () => voi
   const [bWeek, setBWeek] = useState("");     // "" = 全部週次
   const [bWeeks, setBWeeks] = useState<number[]>([]);
   const [bType, setBType] = useState("");     // "" = 兩種題型都列
-  const [bSort, setBSort] = useState("best"); // best / average / attempts / name
+  const [bSort, setBSort] = useState("best"); // best / average / attempts / name / latest / oldest
   const nextTimer = useRef<number | null>(null);
 
   /* ── 選年級 → 一次撈全年級單字（含週次選單）──────── */
@@ -206,6 +214,7 @@ export default function Quiz({ onBack, guest, accountName }: { onBack: () => voi
     } else {
       setSaveErr("Supabase 未設定，成績無法存檔");
     }
+    setFinishAt(new Date().toLocaleString("zh-TW", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }));
     setPhase("result");
   }
 
@@ -240,15 +249,16 @@ export default function Quiz({ onBack, guest, accountName }: { onBack: () => voi
       if (g) wq = wq.eq("grade", Number(g));
       setBWeeks([...new Set(unwrap<{ week: number }>(await wq).map((r) => r.week))].sort((a, b) => a - b));
 
-      // 聚合：依 姓名+年級 分組
+      // 聚合：依 姓名+年級 分組（紀錄已依時間新→舊排序，第一筆即最後一次考試）
       const map = new Map<string, BoardSummary & { sum: number }>();
       for (const r of rows) {
         const key = `${r.name}|${r.grade}`;
-        const e = map.get(key) ?? { name: r.name, grade: r.grade, attempts: 0, best: 0, average: 0, sum: 0 };
+        const e = map.get(key) ?? { name: r.name, grade: r.grade, attempts: 0, best: 0, average: 0, lastAt: "", sum: 0 };
         e.attempts++;
         e.best = Math.max(e.best, r.score);
         e.sum += r.score;
         e.average = Math.round((e.sum / e.attempts) * 10) / 10;
+        if (!e.lastAt) e.lastAt = r.created_at;
         map.set(key, e);
       }
       setSummary([...map.values()].map(({ sum: _sum, ...s }) => s));
@@ -270,6 +280,8 @@ export default function Quiz({ onBack, guest, accountName }: { onBack: () => voi
       case "average":  return b.average - a.average || b.best - a.best;
       case "attempts": return b.attempts - a.attempts || b.best - a.best;
       case "name":     return a.name.localeCompare(b.name, "zh-Hant");
+      case "latest":   return new Date(b.lastAt).getTime() - new Date(a.lastAt).getTime() || b.best - a.best;
+      case "oldest":   return new Date(a.lastAt).getTime() - new Date(b.lastAt).getTime() || b.best - a.best;
       default:         return b.best - a.best || b.average - a.average;
     }
   });
@@ -406,6 +418,7 @@ export default function Quiz({ onBack, guest, accountName }: { onBack: () => voi
           <p className="qz-score-sub">
             {name.trim()}　·　{grade} 年級　第 {week} 週　·　
             {detail.length === 0 ? "沒有作答" : `正確率 ${Math.round((detail.filter((d) => d.correct).length / questions.length) * 100)}%`}
+            {finishAt && <>　·　📅 {finishAt}</>}
           </p>
           <div className="qz-detail-list">
             {detail.map((d, i) => (
@@ -472,6 +485,8 @@ export default function Quiz({ onBack, guest, accountName }: { onBack: () => voi
                 <option value="average">📈 平均分數</option>
                 <option value="attempts">🔁 考試次數</option>
                 <option value="name">🔤 姓名筆畫</option>
+                <option value="latest">🕘 最新考試（新→舊）</option>
+                <option value="oldest">🕗 最初考試（舊→新）</option>
               </select>
             </div>
           </div>
@@ -479,7 +494,7 @@ export default function Quiz({ onBack, guest, accountName }: { onBack: () => voi
           <div className="qz-table-wrap">
             <table className="qz-table">
               <thead>
-                <tr><th>姓名</th>{!bGrade && <th>年級</th>}<th>考過次數</th><th>最佳</th><th>平均</th></tr>
+                <tr><th>姓名</th>{!bGrade && <th>年級</th>}<th>考過次數</th><th>最佳</th><th>平均</th><th>最後考試</th></tr>
               </thead>
               <tbody>
                 {sortedSummary.map((s) => (
@@ -489,10 +504,11 @@ export default function Quiz({ onBack, guest, accountName }: { onBack: () => voi
                     <td className="num">{s.attempts}</td>
                     <td className="num">{s.best}</td>
                     <td className="num">{s.average}</td>
+                    <td className="num">{fmtDateTime(s.lastAt)}</td>
                   </tr>
                 ))}
                 {sortedSummary.length === 0 && !loading && (
-                  <tr><td colSpan={bGrade ? 4 : 5} className="qz-empty">這個範圍目前沒有成績紀錄</td></tr>
+                  <tr><td colSpan={bGrade ? 5 : 6} className="qz-empty">這個範圍目前沒有成績紀錄</td></tr>
                 )}
               </tbody>
             </table>
@@ -506,7 +522,7 @@ export default function Quiz({ onBack, guest, accountName }: { onBack: () => voi
               <tbody>
                 {recent.map((r, i) => (
                   <tr key={i}>
-                    <td className="num">{new Date(r.created_at).toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" })}</td>
+                    <td className="num">{fmtDateTime(r.created_at)}</td>
                     <td>{r.name}</td>
                     <td className="num">{r.grade}</td>
                     <td className="num">第 {r.week} 週</td>
