@@ -108,7 +108,8 @@ npm.cmd run typecheck # 只跑 TypeScript 檢查
 ## 6. 評量活動資料庫（words / scores / score_summary）
 
 > ✅ 已透過 Supabase MCP 建立完成（3 條 migration 記錄在案）。
-> `words` 已灌入全部單字資料：**grade3=288／grade4=433／grade5=432／grade6=432（共 1585 字，各 36 週）**。
+> `words` 目前是**空表** —— 1200E 資料區曾傳錯檔，已刪除重傳；等新資料就緒後
+> 用 `node scripts\seed-words.cjs` 重灌（做法見下方「單字資料來源與灌入方式」）。
 
 | 表／視圖 | 欄位 | 權限設計 |
 | --- | --- | --- |
@@ -129,7 +130,9 @@ npm.cmd run typecheck # 只跑 TypeScript 檢查
     RPC 已於灌入後刪除，重灌前需重建（secret 讀自 `.env` 的 `SUPA_SEED_SECRET`）
   - 音檔命名 grade3~5 含空白、grade6 去空白 → 評量頁產生 mp3 URL 時
     要「先原字、後去空白」兩段嘗試
-- 權限行為已實測：匿名讀 words（1,585 筆）✔／讀 scores 空 ✔／兩邊匿名寫入都被擋 ✔
+- 權限行為已實測：匿名讀 words ✔／讀 scores 空 ✔／兩邊匿名寫入都被擋 ✔
+- ⚠️ 2026-10-22：1200E 資料區使用者誤傳檔案，已刪除待重傳（`words` 已清空、
+  seed 腳本保留；重灌前照下面方式重建一次性 RPC）
 
 ---
 
