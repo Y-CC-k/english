@@ -253,7 +253,7 @@ export default function WordStudy({ onBack }: { onBack: () => void }) {
         )}
       </div>
 
-      {voiceOptions.length === 0 && (
+      {voiceOptions.length === 0 && (!grade || !week) && (
         <div className="ws-hint-row">
           <div className="ws-hint">
             <p className="ws-hint-title">
