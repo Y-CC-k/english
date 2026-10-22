@@ -1,0 +1,206 @@
+/* ============================================
+   評量活動頁 — 沿用 ws-root 玻璃風格補充樣式（qz- 前綴）
+   ============================================ */
+
+.qz-panel {
+    max-width: 720px;
+    margin: 24px auto;
+    padding: 28px 32px;
+    background: var(--ws-glass-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--ws-glass-border);
+    border-radius: 24px;
+    box-shadow: var(--ws-glass-shadow-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    position: relative;
+    z-index: 1;
+}
+
+.qz-panel-wide { max-width: 900px; }
+
+.qz-title { font-size: 20px; font-weight: 700; margin: 0; }
+
+.qz-field { display: flex; flex-direction: column; gap: 6px; }
+
+.qz-field label { font-size: 13px; font-weight: 600; color: var(--ws-text-2); }
+
+.qz-field input,
+.qz-field select {
+    padding: 10px 14px;
+    background: var(--ws-glass-bg-strong);
+    border: 1px solid var(--ws-glass-border);
+    border-radius: 12px;
+    color: var(--ws-text);
+    font-size: 15px;
+    font-family: inherit;
+}
+
+.qz-field input:focus,
+.qz-field select:focus {
+    outline: none;
+    border-color: var(--ws-cyan);
+    box-shadow: 0 0 0 3px rgba(77, 255, 243, 0.2);
+}
+
+.qz-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.qz-start-btn {
+    padding: 14px 28px;
+    background: var(--ws-gradient-pink-purple);
+    color: white;
+    border: none;
+    border-radius: 9999px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(255, 107, 157, 0.4);
+    font-family: inherit;
+}
+
+.qz-start-btn:hover:not(:disabled) { transform: translateY(-2px); }
+.qz-start-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── 作答區 ── */
+.qz-progress { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--ws-text-2); }
+.qz-progress b { color: var(--ws-text); }
+
+.qz-prompt {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 0;
+}
+
+.qz-prompt-chinese { font-size: 34px; font-weight: 700; margin: 0; }
+
+.qz-play-big {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    border: none;
+    background: var(--ws-gradient-blue-cyan);
+    color: white;
+    font-size: 34px;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(77, 159, 255, 0.5);
+}
+
+.qz-play-big:hover { transform: scale(1.08); }
+
+.qz-prompt-hint { font-size: 13px; color: var(--ws-text-3); }
+
+.qz-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.qz-option {
+    padding: 16px 18px;
+    background: var(--ws-glass-bg-strong);
+    border: 1px solid var(--ws-glass-border);
+    border-radius: 14px;
+    color: var(--ws-text);
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    font-family: inherit;
+    transition: all 150ms ease-out;
+}
+
+.qz-option:hover:not(:disabled) { border-color: var(--ws-glass-border-strong); transform: translateY(-2px); }
+.qz-option:disabled { cursor: not-allowed; }
+
+.qz-option.correct {
+    background: linear-gradient(135deg, rgba(46, 204, 113, 0.55), rgba(46, 204, 113, 0.25));
+    border-color: #2ecc71;
+    box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.3);
+}
+
+.qz-option.wrong {
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.55), rgba(231, 76, 60, 0.25));
+    border-color: #e74c3c;
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.3);
+}
+
+/* ── 成績結果 ── */
+.qz-score-big {
+    font-size: 64px;
+    font-weight: 800;
+    text-align: center;
+    background: var(--ws-gradient-rainbow);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+}
+
+.qz-score-sub { text-align: center; color: var(--ws-text-2); margin: 0; }
+
+.qz-error {
+    text-align: center;
+    color: #ff9a9a;
+    background: rgba(231, 76, 60, 0.18);
+    border: 1px solid rgba(231, 76, 60, 0.5);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 14px;
+}
+
+.qz-btn-row { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
+.qz-ghost-btn {
+    padding: 10px 22px;
+    background: var(--ws-glass-bg-strong);
+    border: 1px solid var(--ws-glass-border);
+    border-radius: 9999px;
+    color: var(--ws-text);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.qz-ghost-btn:hover { border-color: var(--ws-glass-border-strong); }
+
+/* ── 成績板 ── */
+.qz-table-wrap { overflow-x: auto; }
+.qz-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.qz-table th {
+    text-align: left;
+    color: var(--ws-text-3);
+    font-weight: 600;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--ws-glass-border-strong);
+    white-space: nowrap;
+}
+.qz-table td { padding: 8px 10px; border-bottom: 1px solid var(--ws-glass-border); }
+.qz-table td.num { font-variant-numeric: tabular-nums; }
+
+.qz-table .me { color: var(--ws-cyan); font-weight: 700; }
+
+.qz-detail-list { display: grid; grid-template-columns: 1fr; gap: 6px; font-size: 14px; }
+.qz-detail-item { display: flex; align-items: center; gap: 8px; }
+.qz-badge {
+    display: inline-block;
+    min-width: 22px;
+    text-align: center;
+    border-radius: 9999px;
+    padding: 1px 8px;
+    font-size: 12px;
+    font-weight: 700;
+}
+.qz-badge.ok { background: rgba(46, 204, 113, 0.35); color: #c6ffb6; }
+.qz-badge.ng { background: rgba(231, 76, 60, 0.35); color: #ffc0b6; }
+
+@media (max-width: 768px) {
+    .qz-panel { margin: 16px; padding: 20px; }
+    .qz-grid2 { grid-template-columns: 1fr; }
+    .qz-options { grid-template-columns: 1fr; }
+    .qz-score-big { font-size: 56px; }
+}

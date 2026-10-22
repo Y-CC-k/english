@@ -137,6 +137,21 @@ npm.cmd run typecheck # 只跑 TypeScript 檢查
 - 「教學模式」= 全螢幕逐字 AUTO 播放（播完 1.5 秒自動下一位），可上一位／下一位／Esc 關閉
 - 登入前後都可用（words 公開可讀），首頁有「📚 單字學習（資料庫版）」按鈕進入
 - 已實測（內建瀏覽器）：grade6 第 5 週 11 張卡、自動播放逐位推進 ✔
+
+### 6.2 評量活動頁（scores / score_summary 主戲）
+
+`src/Quiz.tsx` — 登入後首頁按「📝 評量活動」進入：
+
+- **設定**：姓名（存 localStorage 上次值）、年級、週次、題數（5／10／20／全部）、
+  題型：🎧 聽音選義（TTS 播單字→選中文）／🔍 看義選詞（顯中文→選單字）
+- **作答**：4 選項隨機；聽音題進題自動播音＋可重聽；答對亮綠、答錯亮紅並標正解，
+  1.2 秒自動下一題
+- **收卷**：`scores` 寫入 `name／grade／week／score／detail`（逐題對錯 jsonb）；
+  `user_id` 由 DB `default auth.uid()` 填，前端不可代送
+- **成績板**：`score_summary`（同級最佳／平均排名）＋最近 20 筆紀錄；
+  自己那列高亮
+- 權限已驗證：登入者可寫自己的成績（201）／匿名讀 scores 為空 ✔
+- `scores.week` 欄位由 migration `add_week_to_scores` 加入
 - ⚠️ 2026-10-22：前一版 1200E 資料區誤傳刪除，已重傳為 `1200_ENGLISH/`（僅 JSON、無音檔）並重灌
 
 ---
@@ -158,6 +173,8 @@ supabase-app/
 │  ├─ AuthForms.tsx      登入／註冊／忘記密碼表單
 │  ├─ WordStudy.tsx      單字學習頁（資料庫版 glassmorphism，見 6.1）
 │  ├─ WordStudy.css      其玻璃風格樣式（ws- 前綴）
+│  ├─ Quiz.tsx           評量活動頁：出題作答→scores→成績板（見 6.2）
+│  ├─ Quiz.css           評量頁補充樣式（qz- 前綴，沿用 ws–root）
 │  ├─ ConnectTest.tsx    連線三項測試（可收合）
 │  ├─ App.css
 │  ├─ vite-env.d.ts      環境變數的型別宣告

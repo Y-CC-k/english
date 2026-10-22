@@ -6,6 +6,7 @@ import { speakWord, speakSentence, isSpeechSupported, ensureVoice, currentEnglis
 import AuthForms from "./AuthForms";
 import ConnectTest from "./ConnectTest";
 import WordStudy from "./WordStudy";
+import Quiz from "./Quiz";
 
 function maskKey(key: string) {
   return key.length <= 10 ? "…" : key.slice(0, 6) + "…" + key.slice(-6);
@@ -17,6 +18,7 @@ export default function App() {
   const [showTest, setShowTest] = useState(false);
   const [voiceName, setVoiceName] = useState<string | null>(null);
   const [showWords, setShowWords] = useState(false);
+  const [showQuiz, setShowQuiz] = useState(false);
   const { url, key } = loadConfig();
 
   // 啟動：先讀一次 session，之後由 onAuthStateChange 接手更新
@@ -73,6 +75,13 @@ export default function App() {
   // 已登入
   if (session) {
     const user = session.user;
+    if (showQuiz) {
+      return (
+        <main>
+          <Quiz onBack={() => setShowQuiz(false)} />
+        </main>
+      );
+    }
     if (showWords) {
       return (
         <main>
@@ -116,6 +125,9 @@ export default function App() {
             </div>
           )}
           <div className="row">
+            <button className="btn" onClick={() => setShowQuiz(true)}>
+              📝 評量活動
+            </button>
             <button className="btn" onClick={() => setShowWords(true)}>
               📚 單字學習（資料庫版）
             </button>
