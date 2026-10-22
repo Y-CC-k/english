@@ -270,12 +270,31 @@ code {
 
 .login-btn:hover { background: #1d4ed8; }
 
-.topbar-actions {
+/* 未登入頁首：校徽標題在上，登入／訪客膠囊置中在下 */
+.topbar-auth {
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+}
+
+.topbar-brand {
   display: flex;
   align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.auth-pills {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 10px;
   flex-wrap: wrap;
 }
+
+.auth-pills .login-btn,
+.auth-pills .guest-btn { padding: 10px 22px; font-size: 15px; }
 
 .guest-btn {
   padding: 8px 18px;
@@ -483,9 +502,11 @@ code {
   .row { flex-direction: column; align-items: stretch; }
   .row .btn { width: 100%; margin: 5px 0; padding: 13px 22px; font-size: 16px; }
 
-  /* 頁首：置中堆疊，標題不超出 */
-  .topbar { justify-content: center; text-align: center; }
-  .topbar-actions { justify-content: center; }
+  /* 頁首：登入／訪客膠囊群組本身已置中 */
+  .topbar { justify-content: center; }
+
+  /* 窄螢幕：校徽移到標題上方，置中呈現 */
+  .topbar-brand { flex-direction: column; gap: 6px; }
 
   /* 排行榜篩選：一行一個，避免擠壓 */
   .lb-selects select { flex: 1 1 100%; }
