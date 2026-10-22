@@ -28,13 +28,36 @@
 
 .qz-field input,
 .qz-field select {
+    appearance: none;
+    -webkit-appearance: none;
     padding: 10px 14px;
     background: var(--ws-glass-bg-strong);
     border: 1px solid var(--ws-glass-border);
     border-radius: 12px;
-    color: var(--ws-text);
+    color: #ffffff;
+    color-scheme: dark;
     font-size: 15px;
     font-family: inherit;
+}
+
+/* select 是原生元件：拿掉外觀後自己補一個白色箭頭 */
+.qz-field select {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M1 1l4 4 4-4' stroke='%23ffffff' stroke-width='1.5' fill='none'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+    cursor: pointer;
+}
+
+.qz-field select:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* 展開後的選項清單也要白字深底 */
+.qz-field select option {
+    background: #1a1a2e;
+    color: #ffffff;
 }
 
 .qz-field input:focus,
