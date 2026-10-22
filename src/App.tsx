@@ -15,6 +15,7 @@ export default function App() {
   const [ready, setReady] = useState(false);
   const [showWords, setShowWords] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
+  const [quizBoard, setQuizBoard] = useState(false); // true = 直接開成績板（跳過準備頁）
   const [guestLogin, setGuestLogin] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const guestUser = session?.user.email === GUEST_EMAIL;
@@ -96,9 +97,10 @@ export default function App() {
       return (
         <main>
           <Quiz
-            onBack={() => setShowQuiz(false)}
+            onBack={() => { setShowQuiz(false); setQuizBoard(false); }}
             guest={guestUser}
             accountName={guestUser ? undefined : (session.user.email ?? undefined)}
+            initialBoard={quizBoard}
           />
         </main>
       );
@@ -114,8 +116,11 @@ export default function App() {
       <main className="wrap">
         {header}
         <div className="row">
-          <button className="btn" onClick={() => setShowQuiz(true)}>
+          <button className="btn" onClick={() => { setQuizBoard(false); setShowQuiz(true); }}>
             📝 評量活動
+          </button>
+          <button className="btn" onClick={() => { setQuizBoard(true); setShowQuiz(true); }}>
+            📊 成績板
           </button>
           <button className="btn" onClick={() => setShowWords(true)}>
             📚 單字學習（資料庫版）

@@ -79,8 +79,8 @@ function unwrap<T>(result: { data: T[] | null; error: { message: string } | null
   return result.data ?? [];
 }
 
-export default function Quiz({ onBack, guest, accountName }: { onBack: () => void; guest?: boolean; accountName?: string }) {
-  const [phase, setPhase] = useState<Phase>("setup");
+export default function Quiz({ onBack, guest, accountName, initialBoard }: { onBack: () => void; guest?: boolean; accountName?: string; initialBoard?: boolean }) {
+  const [phase, setPhase] = useState<Phase>(initialBoard ? "board" : "setup");
   // 註冊者：姓名預設其登入帳號（可改）；訪客：沿用這台裝置最後輸入的暱稱
   const [name, setName] = useState(() => accountName ?? localStorage.getItem(NAME_KEY) ?? "");
   const [grade, setGrade] = useState("");
