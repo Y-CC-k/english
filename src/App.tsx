@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { loadConfig, supabase } from "./lib/supabase";
 import { getSession, onAuthChange, signOut } from "./lib/auth";
+import { speakWord, speakSentence, isSpeechSupported, ensureVoice, currentEnglishVoiceName } from "./lib/speak";
 import AuthForms from "./AuthForms";
 import ConnectTest from "./ConnectTest";
 
@@ -13,6 +14,7 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [ready, setReady] = useState(false);
   const [showTest, setShowTest] = useState(false);
+  const [voiceName, setVoiceName] = useState<string | null>(null);
   const { url, key } = loadConfig();
 
   // 啟動：先讀一次 session，之後由 onAuthStateChange 接手更新
@@ -29,6 +31,8 @@ export default function App() {
       }
     });
     const off = onAuthChange((s) => setSession(s));
+    ensureVoice(() => setVoiceName(currentEnglishVoiceName())); // 英文語音清單異步載入，先觸發一次
+    setVoiceName(currentEnglishVoiceName());
     return () => {
       alive = false;
       off();
@@ -88,6 +92,20 @@ export default function App() {
               {showTest ? "隱藏連線測試" : "顯示連線測試"}
             </button>
           </div>
+          {!isSpeechSupported() ? (
+            <div className="kv">此瀏覽器不支援語音合成（請改用 Chrome／Edge）</div>
+          ) : (
+            <div className="row">
+              <span className="kv">
+                發音測試
+                {"　語音：" + (voiceName ?? "找不到英文語音（口音會偏中文）")}
+              </span>
+              <button className="ghost" onClick={() => speakWord("a few")}>🔊 單字</button>
+              <button className="ghost" onClick={() => speakSentence("A few teachers know her name. This is the browser's built in voice.")}>
+                🔊 例句
+              </button>
+            </div>
+          )}
         </div>
         {showTest && <ConnectTest />}
       </main>
