@@ -29,6 +29,22 @@ interface DetailItem {
   correct: boolean;
 }
 
+interface ScoreRow {
+  name: string;
+  grade: number;
+  week: number;
+  score: number;
+  created_at: string;
+}
+
+interface BoardSummary {
+  name: string;
+  grade: number;
+  attempts: number;
+  best: number;
+  average: number;
+}
+
 const GRADES = [
   { value: "", label: "--請選擇--" },
   { value: "3", label: "三年級" },
@@ -76,8 +92,12 @@ export default function Quiz({ onBack, guest }: { onBack: () => void; guest?: bo
   const [saveErr, setSaveErr] = useState("");
 
   // 成績板
-  const [summary, setSummary] = useState<Array<{ name: string; grade: number; attempts: number; best: number; average: number }>>([]);
-  const [recent, setRecent] = useState<Array<{ name: string; week: number; score: number; created_at: string }>>([]);
+  const [summary, setSummary] = useState<BoardSummary[]>([]);
+  const [recent, setRecent] = useState<ScoreRow[]>([]);
+  const [bGrade, setBGrade] = useState("");   // "" = 全部年級
+  const [bWeek, setBWeek] = useState("");     // "" = 全部週次
+  const [bWeeks, setBWeeks] = useState<number[]>([]);
+  const [bSort, setBSort] = useState("best"); // best / average / attempts / name
   const nextTimer = useRef<number | null>(null);
 
   /* ── 選年級 → 一次撈全年級單字（含週次選單）──────── */
@@ -188,20 +208,64 @@ export default function Quiz({ onBack, guest }: { onBack: () => void; guest?: bo
   }, []);
 
   /* ── 成績板 ─────────────────────────────── */
-  async function openBoard() {
+  function openBoard() {
+    setBGrade(grade);           // 預設帶入目前考的年級
+    setBWeek("");
+    setBSort("best");
+    setPhase("board");
+  }
+
+  /** 依年級／週次撈原始紀錄並在前端聚合（summary 聚合、recent 取最新 20 筆） */
+  async function loadBoard(g: string, w: string) {
     const sb = supabase();
     if (!sb) return;
     setLoading(true);
     try {
-      setSummary(unwrap(await sb.from("score_summary").select("*").eq("grade", Number(grade)).order("best", { ascending: false }).limit(30)));
-      setRecent(unwrap(await sb.from("scores").select("name, week, score, created_at").eq("grade", Number(grade)).order("created_at", { ascending: false }).limit(20)));
-      setPhase("board");
+      let query = sb.from("scores").select("name, grade, week, score, created_at");
+      if (g) query = query.eq("grade", Number(g));
+      if (w) query = query.eq("week", Number(w));
+      query = query.order("created_at", { ascending: false });
+      const rows = unwrap<ScoreRow>(await query);
+      setRecent(rows.slice(0, 20));
+
+      // 週次選單：該年級實際有紀錄的週（不受週次篩選影響）
+      let wq = sb.from("scores").select("week");
+      if (g) wq = wq.eq("grade", Number(g));
+      setBWeeks([...new Set(unwrap<{ week: number }>(await wq).map((r) => r.week))].sort((a, b) => a - b));
+
+      // 聚合：依 姓名+年級 分組
+      const map = new Map<string, BoardSummary & { sum: number }>();
+      for (const r of rows) {
+        const key = `${r.name}|${r.grade}`;
+        const e = map.get(key) ?? { name: r.name, grade: r.grade, attempts: 0, best: 0, average: 0, sum: 0 };
+        e.attempts++;
+        e.best = Math.max(e.best, r.score);
+        e.sum += r.score;
+        e.average = Math.round((e.sum / e.attempts) * 10) / 10;
+        map.set(key, e);
+      }
+      setSummary([...map.values()].map(({ sum: _sum, ...s }) => s));
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false);
     }
   }
+
+  // 進成績板畫面時載入一次
+  useEffect(() => {
+    if (phase === "board") void loadBoard(bGrade, bWeek);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
+
+  const sortedSummary = [...summary].sort((a, b) => {
+    switch (bSort) {
+      case "average":  return b.average - a.average || b.best - a.best;
+      case "attempts": return b.attempts - a.attempts || b.best - a.best;
+      case "name":     return a.name.localeCompare(b.name, "zh-Hant");
+      default:         return b.best - a.best || b.average - a.average;
+    }
+  });
 
   return (
     <div className="ws-root">
@@ -352,21 +416,62 @@ export default function Quiz({ onBack, guest }: { onBack: () => void; guest?: bo
 
       {phase === "board" && (
         <div className="qz-panel qz-panel-wide">
-          <h2 className="qz-title">📊 全班成績板（{grade} 年級）</h2>
+          <h2 className="qz-title">📊 全班成績板</h2>
+          <div className="qz-board-controls">
+            <div className="qz-field">
+              <label>年級</label>
+              <select
+                value={bGrade}
+                disabled={loading}
+                onChange={(e) => { setBGrade(e.target.value); setBWeek(""); void loadBoard(e.target.value, ""); }}
+              >
+                <option value="">全部年級</option>
+                <option value="3">三年級</option>
+                <option value="4">四年級</option>
+                <option value="5">五年級</option>
+                <option value="6">六年級</option>
+              </select>
+            </div>
+            <div className="qz-field">
+              <label>週次</label>
+              <select
+                value={bWeek}
+                disabled={loading}
+                onChange={(e) => { setBWeek(e.target.value); void loadBoard(bGrade, e.target.value); }}
+              >
+                <option value="">全部週次</option>
+                {bWeeks.map((n) => <option key={n} value={n}>第 {n} 週</option>)}
+              </select>
+            </div>
+            <div className="qz-field">
+              <label>排序</label>
+              <select value={bSort} onChange={(e) => setBSort(e.target.value)}>
+                <option value="best">🏆 最佳分數</option>
+                <option value="average">📈 平均分數</option>
+                <option value="attempts">🔁 考試次數</option>
+                <option value="name">🔤 姓名筆畫</option>
+              </select>
+            </div>
+          </div>
+          {err && <div className="qz-error">{err}</div>}
           <div className="qz-table-wrap">
             <table className="qz-table">
               <thead>
-                <tr><th>姓名</th><th>考過次數</th><th>最佳</th><th>平均</th></tr>
+                <tr><th>姓名</th>{!bGrade && <th>年級</th>}<th>考過次數</th><th>最佳</th><th>平均</th></tr>
               </thead>
               <tbody>
-                {summary.map((s) => (
-                  <tr key={s.name} className={s.name === name.trim() ? "me" : ""}>
+                {sortedSummary.map((s) => (
+                  <tr key={`${s.name}|${s.grade}`} className={s.name === name.trim() ? "me" : ""}>
                     <td>{s.name}{s.name === name.trim() ? "（我）" : ""}</td>
+                    {!bGrade && <td className="num">{s.grade}</td>}
                     <td className="num">{s.attempts}</td>
                     <td className="num">{s.best}</td>
                     <td className="num">{s.average}</td>
                   </tr>
                 ))}
+                {sortedSummary.length === 0 && !loading && (
+                  <tr><td colSpan={bGrade ? 4 : 5} className="qz-empty">這個範圍目前沒有成績紀錄</td></tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -374,17 +479,21 @@ export default function Quiz({ onBack, guest }: { onBack: () => void; guest?: bo
           <div className="qz-table-wrap">
             <table className="qz-table">
               <thead>
-                <tr><th>時間</th><th>姓名</th><th>週次</th><th>分數</th></tr>
+                <tr><th>時間</th><th>姓名</th><th>年級</th><th>週次</th><th>分數</th></tr>
               </thead>
               <tbody>
                 {recent.map((r, i) => (
                   <tr key={i}>
                     <td className="num">{new Date(r.created_at).toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" })}</td>
                     <td>{r.name}</td>
+                    <td className="num">{r.grade}</td>
                     <td className="num">第 {r.week} 週</td>
                     <td className="num">{r.score}</td>
                   </tr>
                 ))}
+                {recent.length === 0 && !loading && (
+                  <tr><td colSpan={5} className="qz-empty">沒有紀錄</td></tr>
+                )}
               </tbody>
             </table>
           </div>

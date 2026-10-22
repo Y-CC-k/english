@@ -69,6 +69,20 @@
 
 .qz-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
+/* 成績板篩選列：年級／週次／排序 */
+.qz-board-controls {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin: 10px 0 4px;
+}
+
+.qz-empty {
+    text-align: center;
+    color: var(--ws-text-2);
+    padding: 18px 8px !important;
+}
+
 .qz-start-btn {
     padding: 14px 28px;
     background: var(--ws-gradient-pink-purple);
