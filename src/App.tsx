@@ -165,6 +165,7 @@ export default function App() {
       {guestLogin ? (
         <>
           <AuthForms
+            key="guest"
             initialEmail={GUEST_EMAIL}
             guestHint="訪客模式：Email 已填好，請輸入訪客密碼登入；成績會以你輸入的暱稱記錄。"
           />
@@ -174,7 +175,7 @@ export default function App() {
         </>
       ) : (
         <>
-          <AuthForms />
+          <AuthForms key="standard" />
           <button className="ghost" onClick={() => setGuestLogin(true)}>
             🎮 訪客模式（免註冊，成績以暱稱記錄）
           </button>
