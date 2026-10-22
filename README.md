@@ -108,7 +108,7 @@ npm.cmd run typecheck # 只跑 TypeScript 檢查
 ## 6. 評量活動資料庫（words / scores / score_summary）
 
 > ✅ 已透過 Supabase MCP 建立完成（3 條 migration 記錄在案）。
-> `words` 目前是**空表** —— 等 1200E 資料區整理好再灌單字資料。
+> `words` 已灌入全部單字資料：**grade3=288／grade4=433／grade5=432／grade6=432（共 1585 字，各 36 週）**。
 
 | 表／視圖 | 欄位 | 權限設計 |
 | --- | --- | --- |
@@ -121,9 +121,15 @@ npm.cmd run typecheck # 只跑 TypeScript 檢查
 - `scores.user_id` 由 Postgres `default auth.uid()` 填，前端不可代送 — 防止假冒他人送分
 - 已知取捨：因為成績板要讓全班共見，任何登入者都讀得到全部紀錄；
   若日後要「老師才看得到全班」，再加一張 `profiles` 角色表擴充
-- 灌單字資料：1200E 整理好後，我會從 `1200E/document/gradeN.json` 產生 seed SQL
-  （`words` 沒有前端寫入權，這是刻意的）
-- 權限行為已實測：匿名讀 words ✔／讀 scores 空 ✔／兩邊匿名寫入都被擋 ✔
+- 單字資料來源與灌入方式：
+  - grade3/4/5 取自 `1200E/document/gradeN.json`（上層版）
+  - grade6 以「重複資料夾」版（無空白、432 字、與音檔對齊）為基底，
+    疊回上層版的 `word/phonetic/pos/chinese/sentence` 顯示欄位（421 字疊回）
+  - `node scripts\seed-words.cjs` 重灌：走一次性 RPC（先 clear 該年級再 upsert）；
+    RPC 已於灌入後刪除，重灌前需重建（secret 讀自 `.env` 的 `SUPA_SEED_SECRET`）
+  - 音檔命名 grade3~5 含空白、grade6 去空白 → 評量頁產生 mp3 URL 時
+    要「先原字、後去空白」兩段嘗試
+- 權限行為已實測：匿名讀 words（1,585 筆）✔／讀 scores 空 ✔／兩邊匿名寫入都被擋 ✔
 
 ---
 
@@ -136,7 +142,8 @@ supabase-app/
 ├─ .env.example          設定範本（複製成 .env 填入）
 ├─ scripts/
 │  ├─ check-url.mjs                CLI 連線診斷（node scripts\check-url.mjs <url> <key> [table]）
-│  └─ check-assessment-rls.mjs     評量表 RLS 行為驗證（node scripts\check-assessment-rls.mjs）
+│  ├─ check-assessment-rls.mjs     評量表 RLS 行為驗證（node scripts\check-assessment-rls.mjs）
+│  └─ seed-words.cjs               words 單字灌入（node scripts\seed-words.cjs；secret 讀 .env）
 ├─ src/
 │  ├─ main.tsx           React 掛載點
 │  ├─ App.tsx            首頁：依登入狀態切換使用者卡片／登入表單
