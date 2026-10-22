@@ -1,13 +1,18 @@
 import { useState, type FormEvent } from "react";
 import { friendlyAuthError, sendResetMail, signIn, signUp } from "./lib/auth";
 
-type Mode = "login" | "register";
+type Mode = "login" | "register" | "guest";
 type Info = { kind: "ok" | "warn" | "err"; text: string };
 
-/** 登入／註冊表單（同一個元件，上方切頁籤）；initialEmail 可預填（訪客模式用）。 */
-export default function AuthForms({ initialEmail, guestHint }: { initialEmail?: string; guestHint?: string }) {
+/** 訪客模式共用帳號（Dashboard 手動建立；成績以暱稱記錄） */
+const GUEST_EMAIL = "klnes@stu.klnes.tc.edu.tw";
+
+const GUEST_NOTICE = "訪客模式：Email 已填好，請輸入訪客密碼登入；成績會以你輸入的暱稱記錄。";
+
+/** 登入／註冊／訪客表單（三個頁籤，同一個元件）。 */
+export default function AuthForms() {
   const [mode, setMode] = useState<Mode>("login");
-  const [email, setEmail] = useState(initialEmail ?? "");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [busy, setBusy] = useState(false);
@@ -29,7 +34,7 @@ export default function AuthForms({ initialEmail, guestHint }: { initialEmail?: 
 
     setBusy(true);
     try {
-      if (mode === "login") {
+      if (mode === "login" || mode === "guest") {
         const { error } = await signIn(email.trim(), password);
         if (error) {
           setInfo({ kind: "err", text: friendlyAuthError(error.message) });
@@ -78,7 +83,11 @@ export default function AuthForms({ initialEmail, guestHint }: { initialEmail?: 
   return (
     <form className="form" onSubmit={submit}>
       <div className="tabs">
-        <button type="button" className={mode === "login" ? "active" : ""} onClick={() => { setMode("login"); setInfo(null); }}>
+        <button type="button" className={mode === "login" ? "active" : ""} onClick={() => {
+          setMode("login");
+          setInfo(null);
+          if (email === GUEST_EMAIL) setEmail(""); // 從訪客切回個人：清掉共用帳號
+        }}>
           登入
         </button>
         <button
@@ -88,9 +97,16 @@ export default function AuthForms({ initialEmail, guestHint }: { initialEmail?: 
         >
           註冊
         </button>
+        <button
+          type="button"
+          className={`${mode === "guest" ? "active" : ""} guest`}
+          onClick={() => { setMode("guest"); setEmail(GUEST_EMAIL); setInfo(null); }}
+        >
+          🎮 訪客模式
+        </button>
       </div>
 
-      {guestHint && <p className="notice">🎮 {guestHint}</p>}
+      {mode === "guest" && <p className="notice">🎮 {GUEST_NOTICE}</p>}
 
       {mode === "register" && (
         <p className="notice">
@@ -140,7 +156,7 @@ export default function AuthForms({ initialEmail, guestHint }: { initialEmail?: 
       )}
 
       <button className="btn" type="submit" disabled={busy}>
-        {busy ? "處理中…" : mode === "login" ? "登入" : "註冊"}
+        {busy ? "處理中…" : mode === "register" ? "註冊" : "登入"}
       </button>
 
       {mode === "login" && (

@@ -160,6 +160,11 @@ code {
   color: #fff;
 }
 
+.tabs button.active.guest {
+  background: #0d9488;
+  border-color: #0d9488;
+}
+
 .notice {
   margin: 0;
   font-size: 12px;

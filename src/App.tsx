@@ -16,7 +16,6 @@ export default function App() {
   const [showWords, setShowWords] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [quizBoard, setQuizBoard] = useState(false); // true = 直接開成績板（跳過準備頁）
-  const [guestLogin, setGuestLogin] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const guestUser = session?.user.email === GUEST_EMAIL;
 
@@ -131,7 +130,7 @@ export default function App() {
     );
   }
 
-  // 未登入：Hero 點「開始學習」→ 展開登入表單（表單內可切換訪客模式）
+  // 未登入：Hero 點「開始學習」→ 展開登入表單（內含 登入／註冊／訪客模式 三頁籤）
   return (
     <main className="wrap">
       {header}
@@ -141,29 +140,11 @@ export default function App() {
           <span className="hero-sparkle" aria-hidden="true">✨</span>
         </div>
         <p className="hero-tagline">一起聽、一起玩，把 1200 個英文單字通通學會！</p>
-        <button className="hero-cta" onClick={() => { setGuestLogin(false); setLoginOpen(true); }}>
+        <button className="hero-cta" onClick={() => setLoginOpen(true)}>
           🚀 開始學習
         </button>
       </section>
-      {loginOpen && (guestLogin ? (
-        <>
-          <AuthForms
-            key="guest"
-            initialEmail={GUEST_EMAIL}
-            guestHint="訪客模式：Email 已填好，請輸入訪客密碼登入；成績會以你輸入的暱稱記錄。"
-          />
-          <button className="ghost" onClick={() => setGuestLogin(false)}>
-            ← 改用個人帳號
-          </button>
-        </>
-      ) : (
-        <>
-          <AuthForms key="standard" />
-          <button className="ghost" onClick={() => setGuestLogin(true)}>
-            🎮 訪客模式（免註冊，成績以暱稱記錄）
-          </button>
-        </>
-      ))}
+      {loginOpen && <AuthForms />}
       <Leaderboard />
     </main>
   );
