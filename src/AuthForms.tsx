@@ -103,6 +103,7 @@ export default function AuthForms() {
           onClick={() => { setMode("guest"); setEmail(GUEST_EMAIL); setInfo(null); }}
         >
           🎮 訪客模式
+          <small className="tab-sub">（以暱稱記錄成績）</small>
         </button>
       </div>
 
