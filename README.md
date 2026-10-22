@@ -100,6 +100,9 @@ npm.cmd run typecheck # 只跑 TypeScript 檢查
 
 ## 5. 建立示範資料表（klnes，綁定登入者）
 
+> ✅ **此表已於專案中建立完成**（id / user_id / title / note / created_at），
+> 三條 RLS 策略已驗證；匿名寫入正確被擋，登入者的 CRUD 已實測可用。
+
 CRUD 功能直接寫在資料表的 **RLS（Row Level Security）** 上：每個登入者只能讀／寫／刪
 `user_id` 是自己那欄的資料，未登入的訪客什麼都動不了。
 把下面整段貼到 Dashboard → **SQL Editor** 執行（會把原本的 `klnes` 重建）：
