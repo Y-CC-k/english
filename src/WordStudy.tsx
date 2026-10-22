@@ -29,6 +29,8 @@ const GRADES = [
   { value: "6", label: "六年級" },
 ];
 
+const FAV_KEY = "ws-fav-words"; // 我的單字最愛（存在本機裝置）
+
 export default function WordStudy({ onBack }: { onBack: () => void }) {
   const [grade, setGrade] = useState("");
   const [week, setWeek] = useState("");
@@ -39,6 +41,19 @@ export default function WordStudy({ onBack }: { onBack: () => void }) {
   const [error, setError] = useState("");
 
   const [playingId, setPlayingId] = useState<string | null>(null);
+
+  // 我的單字收藏（★ 最愛，存在這台裝置）
+  const [favs, setFavs] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(FAV_KEY) ?? "[]") as string[]; }
+    catch { return []; }
+  });
+  function toggleFav(id: string) {
+    setFavs((f) => {
+      const next = f.includes(id) ? f.filter((x) => x !== id) : [...f, id];
+      localStorage.setItem(FAV_KEY, JSON.stringify(next));
+      return next;
+    });
+  }
 
   // 教學模式
   const [teaching, setTeaching] = useState(false);
@@ -301,6 +316,13 @@ export default function WordStudy({ onBack }: { onBack: () => void }) {
         )}
         {words.map((w) => (
           <div className="ws-card" key={w.id}>
+            <button
+              className={`ws-fav-btn ${favs.includes(w.id) ? "on" : ""}`}
+              onClick={() => toggleFav(w.id)}
+              aria-label={favs.includes(w.id) ? `取消收藏 ${w.word}` : `收藏 ${w.word}`}
+            >
+              {favs.includes(w.id) ? "★" : "☆"}
+            </button>
             <div className="ws-card-info">
               <h2 className="ws-card-word">{w.word}</h2>
               <p className="ws-card-phonetic">{w.phonetic ?? ""}</p>
@@ -328,7 +350,36 @@ export default function WordStudy({ onBack }: { onBack: () => void }) {
             <button className="ws-close-btn" onClick={exitTeaching} aria-label="關閉教學模式">
               ×
             </button>
-            <h2 className="ws-modal-word">{teachWord.word}</h2>
+            {/* 進度條 + 騎在進度上的星星 */}
+            <div className="ws-modal-progress" aria-hidden="true">
+              <div
+                className="ws-modal-progress-fill"
+                style={{ width: `${((teachIndex + 1) / words.length) * 100}%` }}
+              />
+              <span
+                className="ws-modal-progress-star"
+                style={{ left: `${((teachIndex + 1) / words.length) * 100}%` }}
+              >⭐</span>
+            </div>
+            <div className="ws-modal-head">
+              <h2 className="ws-modal-word">{teachWord.word}</h2>
+              <button
+                className="ws-modal-speak"
+                onClick={() => {
+                  stopSpeech();
+                  void speakSequence([
+                    { text: teachWord.word, rate: 0.7 },
+                    ...(teachWord.sentence ? [{ text: teachWord.sentence, rate: 0.75 }] : []),
+                  ]);
+                }}
+                aria-label="再聽一次"
+              >🔊</button>
+              <button
+                className={`ws-fav-btn modal ${favs.includes(teachWord.id) ? "on" : ""}`}
+                onClick={() => toggleFav(teachWord.id)}
+                aria-label={favs.includes(teachWord.id) ? "取消收藏" : "收藏這個單字"}
+              >{favs.includes(teachWord.id) ? "★" : "☆"}</button>
+            </div>
             <p className="ws-modal-phonetic">{teachWord.phonetic ?? ""}</p>
             <p className="ws-modal-details">
               {teachWord.pos && <span className="ws-card-pos">{teachWord.pos}</span>}

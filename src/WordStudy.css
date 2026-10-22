@@ -472,6 +472,108 @@
 
 .ws-close-btn:hover { background: var(--ws-glass-bg-strong); color: var(--ws-text); border-color: var(--ws-glass-border-strong); }
 
+/* ── 兒童風單字閃卡 ── */
+
+/* 收藏星星（卡片右上 / 教學卡） */
+.ws-card { position: relative; }
+
+.ws-fav-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 22px;
+    cursor: pointer;
+    transition: transform 0.15s, color 0.15s;
+}
+
+.ws-fav-btn:hover { transform: scale(1.12); color: #ffd54d; }
+
+/* 教學卡內的星星用排入行程，不絕對定位 */
+.ws-fav-btn.modal { position: static; width: 52px; height: 52px; font-size: 26px; }
+
+.ws-fav-btn.on {
+    color: #ffd54d;
+    border-color: #ffd54d;
+    background: rgba(255, 213, 77, 0.18);
+    text-shadow: 0 0 10px rgba(255, 213, 77, 0.65);
+}
+
+/* 教學模式：進度條 + 騎在進度上的星星 */
+.ws-modal-progress {
+    position: relative;
+    height: 12px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.14);
+    margin: 10px 0 16px;
+}
+
+.ws-modal-progress-fill {
+    height: 100%;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, #FFB86B, #FF7AC6 55%, #8A7CFF);
+    transition: width 0.3s ease-out;
+}
+
+.ws-modal-progress-star {
+    position: absolute;
+    top: -15px;
+    transform: translateX(-50%);
+    font-size: 22px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+}
+
+/* 教學卡：單字列（大字＋大聲公＋收藏） */
+.ws-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+
+.ws-modal-word {
+    font-size: 46px;
+    color: #ffffff;
+    text-shadow: 0 2px 14px rgba(77, 255, 243, 0.35);
+    margin: 0;
+}
+
+.ws-modal-speak {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: none;
+    background: var(--ws-gradient-blue-cyan);
+    color: #fff;
+    font-size: 26px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(77, 159, 255, 0.5);
+    flex-shrink: 0;
+}
+
+.ws-modal-speak:hover { transform: scale(1.1); }
+
+/* 教學卡：前后導覽加大加圓 */
+.ws-modal-nav button {
+    padding: 12px 22px;
+    border-radius: 9999px;
+    border: 1px solid var(--ws-glass-border);
+    background: var(--ws-glass-bg-strong);
+    color: var(--ws-text);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ws-modal-nav button:hover { border-color: var(--ws-glass-border-strong); transform: translateY(-2px); }
+
 /* RWD */
 @media (max-width: 768px) {
     .ws-header-content { flex-direction: column; gap: 8px; text-align: center; }

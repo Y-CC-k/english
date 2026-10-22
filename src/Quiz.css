@@ -205,6 +205,58 @@
 
 .qz-ghost-btn:hover { border-color: var(--ws-glass-border-strong); }
 
+/* ── 兒童風結果頁：獎牌＋彩帶 ── */
+.qz-result { overflow: hidden; }
+
+.qz-result-medal {
+    font-size: 76px;
+    margin: 6px 0 0;
+    animation: qz-medal-pop 0.6s cubic-bezier(0.2, 1.6, 0.4, 1);
+    filter: drop-shadow(0 6px 18px rgba(255, 193, 7, 0.45));
+}
+
+.qz-result-title {
+    font-size: 30px;
+    font-weight: 800;
+    margin: 0;
+    background: var(--ws-gradient-rainbow);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+}
+
+@keyframes qz-medal-pop {
+    0% { transform: scale(0) rotate(-25deg); }
+    60% { transform: scale(1.25) rotate(8deg); }
+    100% { transform: scale(1) rotate(0); }
+}
+
+.qz-confetti {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+.qz-confetti span {
+    position: absolute;
+    top: -34px;
+    animation: qz-fall linear forwards;
+}
+
+@keyframes qz-fall {
+    0% { transform: translateY(0) rotate(0); opacity: 1; }
+    85% { opacity: 1; }
+    100% { transform: translateY(560px) rotate(340deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .qz-result-medal { animation: none; }
+    .qz-confetti span { animation-duration: 0.01s !important; opacity: 0; }
+}
+
 /* ── 成績板 ── */
 .qz-table-wrap { overflow-x: auto; }
 .qz-table { width: 100%; border-collapse: collapse; font-size: 14px; }

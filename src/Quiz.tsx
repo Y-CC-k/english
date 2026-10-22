@@ -286,6 +286,13 @@ export default function Quiz({ onBack, guest, accountName, initialBoard }: { onB
     }
   });
 
+  /* ── 結果頁遊戲化元素 ── */
+  const correctCount = detail.filter((d) => d.correct).length;
+  const ratio = questions.length ? correctCount / questions.length : 0;
+  const medal = ratio === 1 ? "🏆" : ratio >= 0.8 ? "🥇" : ratio >= 0.6 ? "🥈" : "💪";
+  const resultTitle = ratio === 1 ? "全對！太厲害了！" : ratio >= 0.8 ? "做得好！" : ratio >= 0.6 ? "不錯喔！" : "繼續加油！";
+  const CONFETTI = ["🎉", "⭐", "🎊", "✨", "🎈", "🍬"];
+
   return (
     <div className="ws-root">
       <div className="ws-orbs" aria-hidden="true">
@@ -411,13 +418,24 @@ export default function Quiz({ onBack, guest, accountName, initialBoard }: { onB
       )}
 
       {phase === "result" && (
-        <div className="qz-panel">
-          <h2 className="qz-title">🎬 評量結束</h2>
+        <div className="qz-panel qz-result">
+          <div className="qz-confetti" aria-hidden="true">
+            {Array.from({ length: 26 }, (_, i) => (
+              <span key={i} style={{
+                left: `${(i * 97) % 100}%`,
+                fontSize: `${12 + ((i * 7) % 15)}px`,
+                animationDuration: `${2 + (i % 5) * 0.7}s`,
+                animationDelay: `${(i % 8) * 0.3}s`,
+              }}>{CONFETTI[i % CONFETTI.length]}</span>
+            ))}
+          </div>
+          <div className="qz-result-medal" aria-hidden="true">{medal}</div>
+          <h2 className="qz-result-title">{resultTitle}</h2>
           {saveErr && <div className="qz-error">{saveErr}</div>}
-          <p className="qz-score-big">{detail.filter((d) => d.correct).length} / { questions.length}</p>
+          <p className="qz-score-big">{correctCount} / {questions.length}</p>
           <p className="qz-score-sub">
             {name.trim()}　·　{grade} 年級　第 {week} 週　·　
-            {detail.length === 0 ? "沒有作答" : `正確率 ${Math.round((detail.filter((d) => d.correct).length / questions.length) * 100)}%`}
+            {detail.length === 0 ? "沒有作答" : `正確率 ${Math.round(ratio * 100)}%`}
             {finishAt && <>　·　📅 {finishAt}</>}
           </p>
           <div className="qz-detail-list">
@@ -431,8 +449,8 @@ export default function Quiz({ onBack, guest, accountName, initialBoard }: { onB
             ))}
           </div>
           <div className="qz-btn-row">
+            <button className="qz-start-btn" onClick={() => setPhase("setup")}>🔁 再玩一次</button>
             <button className="qz-ghost-btn" onClick={() => void openBoard()}>📊 看全班成績板</button>
-            <button className="qz-ghost-btn" onClick={() => setPhase("setup")}>🔁 再考一次</button>
           </div>
         </div>
       )}

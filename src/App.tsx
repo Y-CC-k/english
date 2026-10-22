@@ -115,6 +115,16 @@ export default function App() {
     return (
       <main className="wrap">
         {header}
+        <section className="hero">
+          <div className="hero-mascot">
+            <img src="school-logo.png" alt="" aria-hidden="true" />
+            <span className="hero-sparkle" aria-hidden="true">✨</span>
+          </div>
+          <p className="hero-tagline">一起聽、一起玩，把 1200 個英文單字通通學會！</p>
+          <button className="hero-cta" onClick={() => { setQuizBoard(false); setShowQuiz(true); }}>
+            🚀 開始學習
+          </button>
+        </section>
         <div className="row">
           <button className="btn" onClick={() => { setQuizBoard(false); setShowQuiz(true); }}>
             📝 評量活動
@@ -135,6 +145,16 @@ export default function App() {
   return (
     <main className="wrap">
       {header}
+      <section className="hero">
+        <div className="hero-mascot">
+          <img src="school-logo.png" alt="" aria-hidden="true" />
+          <span className="hero-sparkle" aria-hidden="true">✨</span>
+        </div>
+        <p className="hero-tagline">一起聽、一起玩，把 1200 個英文單字通通學會！</p>
+        <button className="hero-cta" onClick={() => { setLoginOpen(true); setGuestLogin(true); }}>
+          🚀 開始學習
+        </button>
+      </section>
       {loginOpen && (guestLogin ? (
         <>
           <AuthForms
