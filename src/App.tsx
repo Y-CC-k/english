@@ -14,6 +14,8 @@ const GUEST_EMAIL = "klnes@stu.klnes.tc.edu.tw";
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [battleParams, setBattleParams] = useState<{ grade: number, week: number } | null>(null);
+  // 全域頁面狀態：study(單字), quiz(評量), board(成績), battle(副本)
+  const [view, setView] = useState<'study' | 'quiz' | 'board' | 'battle'>('study');
   const [ready, setReady] = useState(false);
   const [showWords, setShowWords] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
@@ -50,27 +52,65 @@ export default function App() {
   // 讀自己的身分別（profiles.role）；DB 端 policy 保證只能讀自己的
   useEffect(() => {
     const sb = supabase();
-    if (!session?.user.id || !sb) { setRole(null); return; }
+    if (!session?.user.id || !sb) { setRole(0); return; }
     let alive = true;
     sb.from("profiles").select("role").eq("id", session.user.id).single()
       .then(({ data }) => { if (alive) setRole((data as { role: number } | null)?.role ?? 0); });
     return () => { alive = false; };
   }, [session?.user.id]);
 
+  // 切換頁面視圖
+  const renderView = () => {
+    if (battleParams) return (
+      <Battle 
+        grade={battleParams.grade} 
+        week={battleParams.week} 
+        onBack={() => setBattleParams(null)} 
+      />
+    );
+    switch (view) {
+      case 'study': return <WordStudy />;
+      case 'quiz': return (
+        <Quiz 
+          onBack={() => setView('quiz')} 
+          guest={guestUser} 
+          accountName={guestUser ? undefined : (session.user.email ?? undefined)}
+          teacher={!guestUser && role === 1}
+          initialBoard={false}
+          onStartBattle={(g, w) => setBattleParams({ grade: g, week: w })}
+        />
+      );
+      case 'board': return (
+        <Quiz 
+          onBack={() => setView('board')} 
+          guest={guestUser} 
+          accountName={guestUser ? undefined : (session.user.email ?? undefined)}
+          teacher={!guestUser && role === 1}
+          initialBoard={true}
+          onStartBattle={(g, w) => setBattleParams({ grade: g, week: w })}
+        />
+      );
+      default: return <WordStudy />;
+    }
+  };
+
   const header = session ? (
     <div className="topbar">
       <div className="topbar-brand">
-        <img src="school-logo.png" alt="槺榔國小校徽" style={{ width: 56, height: 56, borderRadius: "50%", background: "#fff", padding: 3, boxShadow: "0 2px 10px rgba(0,0,0,0.2)" }} />
+        <img src="school-logo.png" alt="校徽" style={{ width: 40, height: 40, borderRadius: "50%", background: "#fff", padding: 3, boxShadow: "0 2px 5px rgba(0,0,0,0.1)" }} />
         <h1>國小英文單字學習網</h1>
       </div>
-      <button className="logout-btn" onClick={() => { void signOut(); }}>
-        登出
-      </button>
+      <nav className="nav-menu">
+        <button className={view === 'study' ? 'active' : ''} onClick={() => setView('study')}>📖 單字學習</button>
+        <button className={view === 'quiz' ? 'active' : ''} onClick={() => setView('quiz')}>🎮 評量活動</button>
+        <button className={view === 'board' ? 'active' : ''} onClick={() => setView('board')}>📊 成績板</button>
+        <button className="logout-btn" onClick={() => void signOut()}>登出</button>
+      </nav>
     </div>
   ) : (
     <div className="topbar topbar-auth">
       <div className="topbar-brand">
-        <img src="school-logo.png" alt="槺榔國小校徽" style={{ width: 56, height: 56, borderRadius: "50%", background: "#fff", padding: 3, boxShadow: "0 2px 10px rgba(0,0,0,0.2)" }} />
+        <img src="school-logo.png" alt="校徽" style={{ width: 40, height: 40, borderRadius: "50%", background: "#fff", padding: 3, boxShadow: "0 2px 5px rgba(0,0,0,0.1)" }} />
         <h1>國小英文單字學習網</h1>
       </div>
     </div>
