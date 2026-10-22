@@ -45,32 +45,22 @@ export default function App() {
     };
   }, []);
 
-  const header = (
-    <div className={`topbar ${!session ? "topbar-auth" : ""}`}>
+  const header = session ? (
+    <div className="topbar">
       <div className="topbar-brand">
         <img src="school-logo.png" alt="槺榔國小校徽" style={{ width: 56, height: 56, borderRadius: "50%", background: "#fff", padding: 3, boxShadow: "0 2px 10px rgba(0,0,0,0.2)" }} />
         <h1>國小英文單字學習網</h1>
       </div>
-      {!session ? (
-        <div className="auth-pills">
-          <button className="login-btn" onClick={() => {
-            if (loginOpen && !guestLogin) setLoginOpen(false);
-            else { setGuestLogin(false); setLoginOpen(true); }
-          }}>
-            🔐 登入
-          </button>
-          <button className="guest-btn" onClick={() => {
-            if (loginOpen && guestLogin) setLoginOpen(false);
-            else { setLoginOpen(true); setGuestLogin(true); }
-          }}>
-            🎮 訪客模式
-          </button>
-        </div>
-      ) : (
-        <button className="logout-btn" onClick={() => { void signOut(); }}>
-          登出
-        </button>
-      )}
+      <button className="logout-btn" onClick={() => { void signOut(); }}>
+        登出
+      </button>
+    </div>
+  ) : (
+    <div className="topbar topbar-auth">
+      <div className="topbar-brand">
+        <img src="school-logo.png" alt="槺榔國小校徽" style={{ width: 56, height: 56, borderRadius: "50%", background: "#fff", padding: 3, boxShadow: "0 2px 10px rgba(0,0,0,0.2)" }} />
+        <h1>國小英文單字學習網</h1>
+      </div>
     </div>
   );
 
@@ -141,7 +131,7 @@ export default function App() {
     );
   }
 
-  // 未登入：登入／訪客表單 + 公開排行榜
+  // 未登入：Hero 點「開始學習」→ 展開登入表單（表單內可切換訪客模式）
   return (
     <main className="wrap">
       {header}
@@ -151,7 +141,7 @@ export default function App() {
           <span className="hero-sparkle" aria-hidden="true">✨</span>
         </div>
         <p className="hero-tagline">一起聽、一起玩，把 1200 個英文單字通通學會！</p>
-        <button className="hero-cta" onClick={() => { setLoginOpen(true); setGuestLogin(true); }}>
+        <button className="hero-cta" onClick={() => { setGuestLogin(false); setLoginOpen(true); }}>
           🚀 開始學習
         </button>
       </section>
@@ -167,7 +157,12 @@ export default function App() {
           </button>
         </>
       ) : (
-        <AuthForms key="standard" />
+        <>
+          <AuthForms key="standard" />
+          <button className="ghost" onClick={() => setGuestLogin(true)}>
+            🎮 訪客模式（免註冊，成績以暱稱記錄）
+          </button>
+        </>
       ))}
       <Leaderboard />
     </main>
