@@ -17,6 +17,7 @@ export default function App() {
   const [showQuiz, setShowQuiz] = useState(false);
   const [quizBoard, setQuizBoard] = useState(false); // true = 直接開成績板（跳過準備頁）
   const [loginOpen, setLoginOpen] = useState(false);
+  const [role, setRole] = useState<string | null>(null); // profiles.role：student / teacher
   const guestUser = session?.user.email === GUEST_EMAIL;
 
   // 訪客帳號登入成功 → 直接帶進評量頁（不用再按）
@@ -24,7 +25,7 @@ export default function App() {
     if (guestUser && !showQuiz && !showWords) setShowQuiz(true);
   }, [guestUser, session?.user.id, showQuiz, showWords]);
 
-  // 啟動：先讀一次 session，之後由 onAuthStateChange 接手更新
+  // 啟動：先讀一次 session
   useEffect(() => {
     if (!supabase()) {
       setReady(true);
@@ -43,6 +44,16 @@ export default function App() {
       off();
     };
   }, []);
+
+  // 讀自己的身分別（profiles.role）；DB 端 policy 保證只能讀自己的
+  useEffect(() => {
+    const sb = supabase();
+    if (!session?.user.id || !sb) { setRole(null); return; }
+    let alive = true;
+    sb.from("profiles").select("role").eq("id", session.user.id).single()
+      .then(({ data }) => { if (alive) setRole((data as { role: string } | null)?.role ?? null); });
+    return () => { alive = false; };
+  }, [session?.user.id]);
 
   const header = session ? (
     <div className="topbar">
@@ -89,6 +100,7 @@ export default function App() {
             onBack={() => { setShowQuiz(false); setQuizBoard(false); }}
             guest={guestUser}
             accountName={guestUser ? undefined : (session.user.email ?? undefined)}
+            teacher={!guestUser && role === "teacher"}
             initialBoard={quizBoard}
           />
         </main>

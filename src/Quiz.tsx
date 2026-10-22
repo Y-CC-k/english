@@ -79,7 +79,7 @@ function unwrap<T>(result: { data: T[] | null; error: { message: string } | null
   return result.data ?? [];
 }
 
-export default function Quiz({ onBack, guest, accountName, initialBoard }: { onBack: () => void; guest?: boolean; accountName?: string; initialBoard?: boolean }) {
+export default function Quiz({ onBack, guest, accountName, teacher, initialBoard }: { onBack: () => void; guest?: boolean; accountName?: string; teacher?: boolean; initialBoard?: boolean }) {
   const [phase, setPhase] = useState<Phase>(initialBoard ? "board" : "setup");
   // 註冊者：姓名預設其登入帳號（可改）；訪客：沿用這台裝置最後輸入的暱稱
   const [name, setName] = useState(() => accountName ?? localStorage.getItem(NAME_KEY) ?? "");
@@ -112,6 +112,8 @@ export default function Quiz({ onBack, guest, accountName, initialBoard }: { onB
   const [bType, setBType] = useState("");     // "" = 兩種題型都列
   const [bSort, setBSort] = useState("best"); // best / average / attempts / name / latest / oldest
   const nextTimer = useRef<number | null>(null);
+  // 老師專區：老師登入才另外抓含 IP 的完整紀錄（SQL 函式 teacher_scores 本身管權限）
+  const [teacherRows, setTeacherRows] = useState<(ScoreRow & { ip: string | null })[]>([]);
 
   /* ── 取得本機公網 IP（成績記錄用；抓不到就留空，不影響作答） ── */
   const [ip, setIp] = useState("");
@@ -277,6 +279,15 @@ export default function Quiz({ onBack, guest, accountName, initialBoard }: { onB
         map.set(key, e);
       }
       setSummary([...map.values()].map(({ sum: _sum, ...s }) => s));
+
+      // 老師專區（SQL 函式本身會驗身分，非老師回 0 筆）
+      if (teacher) {
+        try {
+          setTeacherRows(unwrap<ScoreRow & { ip: string | null }>(await sb.rpc("teacher_scores")));
+        } catch {
+          setTeacherRows([]);
+        }
+      }
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     } finally {
@@ -569,6 +580,36 @@ export default function Quiz({ onBack, guest, accountName, initialBoard }: { onB
               </tbody>
             </table>
           </div>
+
+          {teacher && (
+            <>
+              <h2 className="qz-title" style={{ marginTop: 8 }}>🧑‍🏫 老師專區（含 IP）</h2>
+              <div className="qz-table-wrap">
+                <table className="qz-table">
+                  <thead>
+                    <tr><th>時間</th><th>姓名</th><th>年級</th><th>週次</th><th>題型</th><th>分數</th><th>IP</th></tr>
+                  </thead>
+                  <tbody>
+                    {teacherRows.map((r, i) => (
+                      <tr key={i}>
+                        <td className="num">{fmtDateTime(r.created_at)}</td>
+                        <td>{r.name}</td>
+                        <td className="num">{r.grade}</td>
+                        <td className="num">第 {r.week} 週</td>
+                        <td>{r.qtype ? QTYPE_LABEL[r.qtype] ?? r.qtype : "—"}</td>
+                        <td className="num">{r.score}</td>
+                        <td className="num">{r.ip ?? "—"}</td>
+                      </tr>
+                    ))}
+                    {teacherRows.length === 0 && !loading && (
+                      <tr><td colSpan={7} className="qz-empty">沒有紀錄</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+
           <div className="qz-btn-row">
             <button className="qz-ghost-btn" onClick={() => setPhase("setup")}>← 回準備頁</button>
           </div>
