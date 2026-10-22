@@ -113,6 +113,20 @@ export default function Quiz({ onBack, guest, accountName, initialBoard }: { onB
   const [bSort, setBSort] = useState("best"); // best / average / attempts / name / latest / oldest
   const nextTimer = useRef<number | null>(null);
 
+  /* ── 取得本機公網 IP（成績記錄用；抓不到就留空，不影響作答） ── */
+  const [ip, setIp] = useState("");
+  useEffect(() => {
+    let alive = true;
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 8000);
+    fetch("https://api.ipify.org?format=json", { signal: controller.signal })
+      .then((r) => r.json())
+      .then((d: { ip?: string }) => { if (alive && d.ip) setIp(d.ip); })
+      .catch(() => { /* 抓不到就留空 */ })
+      .finally(() => window.clearTimeout(timer));
+    return () => { alive = false; controller.abort(); };
+  }, []);
+
   /* ── 選年級 → 一次撈全年級單字（含週次選單）──────── */
   async function handleGradeChange(g: string) {
     setGrade(g);
@@ -209,6 +223,7 @@ export default function Quiz({ onBack, guest, accountName, initialBoard }: { onB
         qtype: listen ? "listen" : "wordpick",
         score: finalScore,
         detail: detailRef.current,
+        ...(ip ? { ip } : {}), // 本機公網 IP（抓不到就略過）
       });
       if (error) setSaveErr(`成績存檔失敗：${error.message}`);
     } else {
