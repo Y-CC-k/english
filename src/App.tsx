@@ -49,7 +49,7 @@ export default function App() {
     <div className={`topbar ${!session ? "topbar-auth" : ""}`}>
       <div className="topbar-brand">
         <img src="school-logo.png" alt="槺榔國小校徽" style={{ width: 56, height: 56, borderRadius: "50%", background: "#fff", padding: 3, boxShadow: "0 2px 10px rgba(0,0,0,0.2)" }} />
-        <h1>臺中市清水區槺榔國民小學---英文1200字單字學習網</h1>
+        <h1>英文1200字單字學習網</h1>
       </div>
       {!session ? (
         <div className="auth-pills">
