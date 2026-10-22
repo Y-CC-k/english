@@ -84,7 +84,7 @@ export default function Leaderboard() {
               <span className="lb-rank">{MEDALS[i] ?? `${i + 1}.`}</span>
               <b className="lb-name">{r.name}</b>
               <span className="lb-meta">{r.grade} 年級 · 第 {r.week} 週</span>
-              {r.qtype && <span className="lb-qtype">{r.qtype === "listen" ? "🎧" : "🔍"}</span>}
+              {r.qtype && <span className="lb-qtype">{r.qtype === "listen" ? "🎧 聽音" : "🔍 看義"}</span>}
               <span className="lb-score">{r.score} 分</span>
             </li>
           ))}
