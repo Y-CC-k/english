@@ -72,9 +72,10 @@ function unwrap<T>(result: { data: T[] | null; error: { message: string } | null
   return result.data ?? [];
 }
 
-export default function Quiz({ onBack, guest }: { onBack: () => void; guest?: boolean }) {
+export default function Quiz({ onBack, guest, accountName }: { onBack: () => void; guest?: boolean; accountName?: string }) {
   const [phase, setPhase] = useState<Phase>("setup");
-  const [name, setName] = useState(() => localStorage.getItem(NAME_KEY) ?? "");
+  // 註冊者：姓名預設其登入帳號（可改）；訪客：沿用這台裝置最後輸入的暱稱
+  const [name, setName] = useState(() => accountName ?? localStorage.getItem(NAME_KEY) ?? "");
   const [grade, setGrade] = useState("");
   const [week, setWeek] = useState("");
   const [count, setCount] = useState("10");
@@ -158,7 +159,7 @@ export default function Quiz({ onBack, guest }: { onBack: () => void; guest?: bo
     setScore(0);
     setSaveErr("");
     setErr("");
-    localStorage.setItem(NAME_KEY, name.trim());
+    if (!accountName) localStorage.setItem(NAME_KEY, name.trim()); // 訪客暱稱才記憶；註冊者用帳號不寫入
     setPhase("quiz");
   }
 
@@ -311,7 +312,7 @@ export default function Quiz({ onBack, guest }: { onBack: () => void; guest?: bo
           <h2 className="qz-title">📝 準備開始</h2>
           {err && <div className="qz-error">{err}</div>}
           <div className="qz-field">
-            <label>姓名（顯示在成績板）</label>
+            <label>姓名（顯示在成績板{accountName ? "，預設為您的帳號" : ""}）</label>
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="例如：王小明" />
           </div>
           <div className="qz-grid2">

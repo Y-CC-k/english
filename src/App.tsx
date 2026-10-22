@@ -89,6 +89,7 @@ export default function App() {
           <Quiz
             onBack={() => setShowQuiz(false)}
             guest={guestUser}
+            accountName={guestUser ? undefined : (session.user.email ?? undefined)}
           />
         </main>
       );
