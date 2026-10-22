@@ -280,6 +280,11 @@ export default function WordStudy({ onBack }: { onBack: () => void }) {
                   🔗 直接開啟 Windows 設定
                 </a>
               </li>
+              <li>
+                <b>iPad／iPhone：</b>設定 → <b>輔助使用</b> → <b>朗讀內容</b> →
+                <b>聲音</b> → 選「English」→ 選定／下載一個英文聲音（如 <b>Samantha</b>），
+                回到頁面按「🔄 重新掃描語音」
+              </li>
             </ol>
             <p className="ws-hint-foot">
               裝好語音後<b>把瀏覽器關掉重開</b>，再按「🔄 重新掃描語音」就會出現在選單裡。

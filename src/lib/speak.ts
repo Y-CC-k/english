@@ -63,7 +63,7 @@ function pickEnglishVoice(): SpeechSynthesisVoice | null {
   return cachedVoice;
 }
 
-/** 語音清單是異步載入的：第一次查不到就等 voiceschanged 事件再試。 */
+/** 語音清單是異步載入的：voiceschanged 事件 + 輪詢雙保險（iPad Safari 不一定觸發事件）。 */
 export function ensureVoice(onReady?: () => void): void {
   if (pickEnglishVoice() ?? null) return;
   const v = window.speechSynthesis;
@@ -77,6 +77,37 @@ export function ensureVoice(onReady?: () => void): void {
     },
     { once: true },
   );
+  // iOS/iPadOS Safari：voices 清單常要幾百 ms～數秒才填入，用輪詢兜底
+  let tries = 0;
+  const timer = window.setInterval(() => {
+    tries++;
+    cachedVoice = undefined;
+    if (pickEnglishVoice() ?? null) {
+      window.clearInterval(timer);
+      onReady?.();
+    } else if (tries > 12) {
+      window.clearInterval(timer); // 約 3 秒仍無 → 放棄（畫面會走「沒有英文語音」提示）
+    }
+  }, 250);
+}
+
+/**
+ * iOS/iPadOS Safari 首次語音合成必須發生在使用者手勢之後。
+ * 在第一次 pointerdown 時偷偷播一個靜音音節「暖機」，之後的自動播音就會正常。
+ */
+let primed = false;
+function primeSpeech(): void {
+  if (primed || !isSpeechSupported()) return;
+  primed = true;
+  const synth = window.speechSynthesis;
+  const u = new SpeechSynthesisUtterance(" ");
+  u.volume = 0;
+  synth.speak(u);
+  synth.cancel();
+}
+if (typeof window !== "undefined" && "speechSynthesis" in window) {
+  document.addEventListener("pointerdown", primeSpeech, { once: true, capture: true });
+  document.addEventListener("keydown", primeSpeech, { once: true, capture: true });
 }
 
 export function isSpeechSupported(): boolean {
