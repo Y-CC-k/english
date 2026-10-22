@@ -4,7 +4,6 @@ import { loadConfig, supabase } from "./lib/supabase";
 import { getSession, onAuthChange, signOut } from "./lib/auth";
 import AuthForms from "./AuthForms";
 import ConnectTest from "./ConnectTest";
-import KlnesCRUD from "./KlnesCRUD";
 
 function maskKey(key: string) {
   return key.length <= 10 ? "…" : key.slice(0, 6) + "…" + key.slice(-6);
@@ -90,7 +89,6 @@ export default function App() {
             </button>
           </div>
         </div>
-        <KlnesCRUD />
         {showTest && <ConnectTest />}
       </main>
     );

@@ -75,20 +75,19 @@ async function testApiSpec(url: string, key: string): Promise<Check> {
   }
 }
 
-/** 測試 3：用 supabase-js 實際查詢 public.klnes 資料表。 */
+/** 測試 3：用 supabase-js 實際查詢 public.words（單字 master 表）。 */
 async function testTable(): Promise<Check> {
-  const label = "資料庫查詢（public.klnes）";
+  const label = "資料庫查詢（public.words）";
   try {
-    const { data, error } = await supabase()!.from("klnes").select("*").limit(5);
+    const { data, error } = await supabase()!.from("words").select("*").limit(5);
     if (error) {
-      // 還沒執行 README 第 5 節的重建 SQL → 連線其實是通的
-      if (error.code?.startsWith("PGRST")) {
+      if ((error.code ?? "").startsWith("PGRST")) {
         return {
           label,
           status: "warn",
           message:
-            "supabase-js 已打通資料庫，但查無 public.klnes（還沒重建示範表）。" +
-            "照 README 第 5 節把 SQL 貼到 SQL Editor 執行後再測一次。",
+            "supabase-js 已打通資料庫，但查無 public.words。" +
+            "words master 表應已建立，若看到此訊息請重新跑一次 migration。",
         };
       }
       return { label, status: "fail", message: `${error.code ?? "?"} ${error.message}` };
@@ -96,10 +95,9 @@ async function testTable(): Promise<Check> {
     return {
       label,
       status: "ok",
-      message:
-        `查詢成功，目前 ${data.length} 筆` +
+      message: `查詢成功，目前 ${data.length} 筆` +
         (data.length ? "：" + data.map((r) => JSON.stringify(r)).join("；") : "") +
-        "（RLS 只回登入者自己的資料，未登入時通常 0 筆）",
+        "（words 是空表代表單字資料還沒灌入，屬正常）",
     };
   } catch (err) {
     return { label, status: "fail", message: err instanceof Error ? err.message : String(err) };

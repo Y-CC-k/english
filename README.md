@@ -62,9 +62,7 @@ npm.cmd run typecheck # 只跑 TypeScript 檢查
 | --- | --- |
 | ① Auth 服務 + 金鑰驗證 | URL 正確、專案運行中、publishable key 被接受（HTTP 200） |
 | ② REST API 描述端點 | 新版金鑰架構只收 secret key → 顯示 ⚠ 是**正常**的；顯示 ✔ 也正常（舊版 JWT 金鑰） |
-| ③ 查詢 `public.klnes` | supabase-js 真的打通了資料庫（未登入時通常回 0 筆，屬正常） |
-
-③ 顯示「還沒建表」是正常的 —— 先做下一步。
+| ③ 查詢 `public.words`（單字 master） | supabase-js 真的打通了資料庫（空表＝單字資料尚未灌入，屬正常） |
 
 ---
 
@@ -98,44 +96,12 @@ npm.cmd run typecheck # 只跑 TypeScript 檢查
 
 ---
 
-## 5. 建立示範資料表（klnes，綁定登入者）
+## 5. klnes 示範表（已移除）
 
-> ✅ **此表已於專案中建立完成**（id / user_id / title / note / created_at），
-> 三條 RLS 策略已驗證；匿名寫入正確被擋，登入者的 CRUD 已實測可用。
-
-CRUD 功能直接寫在資料表的 **RLS（Row Level Security）** 上：每個登入者只能讀／寫／刪
-`user_id` 是自己那欄的資料，未登入的訪客什麼都動不了。
-把下面整段貼到 Dashboard → **SQL Editor** 執行（會把原本的 `klnes` 重建）：
-
-```sql
-drop table if exists public.klnes;
-
-create table public.klnes (
-  id         uuid primary key default gen_random_uuid(),
-  user_id    uuid not null default auth.uid() references auth.users (id) on delete cascade,
-  title      text not null,
-  note       text,
-  created_at timestamptz not null default now()
-);
-
-alter table public.klnes enable row level security;
-
-create policy "登入者可讀自己的資料" on public.klnes
-  for select to authenticated using (auth.uid() = user_id);
-
-create policy "登入者可新增自己的資料" on public.klnes
-  for insert to authenticated with check (auth.uid() = user_id);
-
-create policy "登入者可刪自己的資料" on public.klnes
-  for delete to authenticated using (auth.uid() = user_id);
-```
-
-三個設計重點：
-
-1. `user_id uuid not null default auth.uid()` —— 前端**不需要**也不能送 `user_id`，
-   Postgres 自己用登入者的 ID 填，防止假冒。
-2. 三條 policy 都只給 `to authenticated`，且都以 `auth.uid() = user_id` 條件收緊。
-3. 想清理自己所有資料時：`delete from public.klnes where user_id = auth.uid();`（在 SQL Editor 用你自己身分執行不了，還是要走畫面；管理員可刪整表）。
+> 🗑 klnes 示範表（含 2 筆測試資料）已於 2026-10-22 用 Supabase MCP 刪除
+> （migration `drop_klnes_demo_table`），網頁上的 CRUD 示範面板與 `lib/klnes.ts` 一併移除。
+> RLS「綁定登入者」的實作模式由評量資料庫（第 6 節的 `scores`）沿用。
+> 若需要重建，舊的建表 SQL 可在 git 歷史（commit `5fc0ab0`）找到。
 
 ---
 
@@ -169,20 +135,18 @@ supabase-app/
 ├─ vite.config.ts        Vite 設定
 ├─ .env.example          設定範本（複製成 .env 填入）
 ├─ scripts/
-│  └─ check-url.mjs      CLI 連線診斷（node scripts\check-url.mjs <url> <key> [table]）
-├─ scripts\check-assessment-rls.mjs   評量表 RLS 行為驗證（node scripts\check-assessment-rls.mjs）
+│  ├─ check-url.mjs                CLI 連線診斷（node scripts\check-url.mjs <url> <key> [table]）
+│  └─ check-assessment-rls.mjs     評量表 RLS 行為驗證（node scripts\check-assessment-rls.mjs）
 ├─ src/
 │  ├─ main.tsx           React 掛載點
 │  ├─ App.tsx            首頁：依登入狀態切換使用者卡片／登入表單
 │  ├─ AuthForms.tsx      登入／註冊／忘記密碼表單
-│  ├─ KlnesCRUD.tsx      klnes 表的新增／列表／刪除面板（登入後顯示）
 │  ├─ ConnectTest.tsx    連線三項測試（可收合）
 │  ├─ App.css
 │  ├─ vite-env.d.ts      環境變數的型別宣告
 │  └─ lib/
 │     ├─ supabase.ts     Supabase client（單例，從 import.meta.env 讀設定）
-│     ├─ auth.ts         登入／註冊／登出／session 訂閱與錯誤中文化
-│     └─ klnes.ts        klnes 表的 CRUD API 封裝（新增／列出／刪除＋RLS 錯誤中文化）
+│     └─ auth.ts         登入／註冊／登出／session 訂閱與錯誤中文化
 ├─ 1200E/                1200 單字資料區（使用者自行整理中；版控暫時排除）
 │  ├─ Audio/             各年級各週的單字 mp3（Grade3～6）
 │  ├─ document/          grade3~6.json 單字資料（週次 → word/phonetic/pos/chinese/sentence）
@@ -214,16 +178,15 @@ gh repo create <儲存庫名> --private --source . --push
 
 金鑰安全提醒：`publishable key` 放前端是設計如此，可以進版控；
 `service_role`／`secret` 金鑰**永遠**不能 commit，也不要放進這個儲存庫的任何檔案。
-```
 
 之後要擴充（Realtime、Storage）都在 `src/lib/` 加檔案即可：
 
 ```ts
-// Realtime：監聽 klnes 表的新增
+// Realtime：監聽 scores 表的新增（全班成績板即時更新）
 supabase()!
-  .channel("klnes-ch")
-  .on("postgres_changes", { event: "INSERT", schema: "public", table: "klnes" }, (payload) => {
-    console.log("收到新資料：", payload.new);
+  .channel("scores-ch")
+  .on("postgres_changes", { event: "INSERT", schema: "public", table: "scores" }, (payload) => {
+    console.log("收到新成績：", payload.new);
   })
   .subscribe();
 ```
