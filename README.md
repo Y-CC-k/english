@@ -139,7 +139,29 @@ create policy "登入者可刪自己的資料" on public.klnes
 
 ---
 
-## 6. 專案結構
+## 6. 評量活動資料庫（words / scores / score_summary）
+
+> ✅ 已透過 Supabase MCP 建立完成（3 條 migration 記錄在案）。
+> `words` 目前是**空表** —— 等 1200E 資料區整理好再灌單字資料。
+
+| 表／視圖 | 欄位 | 權限設計 |
+| --- | --- | --- |
+| `words` 單字 master | `grade`(3–6)、`week`、`word`、`phonetic`、`pos`、`chinese`、`sentence`；同 grade+week+word 不重複 | **人人可讀**（含匿名的文字字典內容）；寫入只走 SQL Editor／MCP |
+| `scores` 成績紀錄 | `id`、`created_at`（當下日期時間）、`name`（姓名）、`grade`（級數）、`score`（分數）、`detail` jsonb（逐題對答，留給回顧） | 登入者**看得到全班**（成績投影用）；只能以自己身分**新增**、只能**刪自己** |
+| `score_summary` 統計 | 依姓名＋級數彙整：`attempts`／`best`／`average`／`last_record` | 跟隨 `scores` 的 RLS（`security_invoker = on`） |
+
+設計說明：
+
+- `scores.user_id` 由 Postgres `default auth.uid()` 填，前端不可代送 — 防止假冒他人送分
+- 已知取捨：因為成績板要讓全班共見，任何登入者都讀得到全部紀錄；
+  若日後要「老師才看得到全班」，再加一張 `profiles` 角色表擴充
+- 灌單字資料：1200E 整理好後，我會從 `1200E/document/gradeN.json` 產生 seed SQL
+  （`words` 沒有前端寫入權，這是刻意的）
+- 權限行為已實測：匿名讀 words ✔／讀 scores 空 ✔／兩邊匿名寫入都被擋 ✔
+
+---
+
+## 7. 專案結構
 
 ```
 supabase-app/
@@ -148,6 +170,7 @@ supabase-app/
 ├─ .env.example          設定範本（複製成 .env 填入）
 ├─ scripts/
 │  └─ check-url.mjs      CLI 連線診斷（node scripts\check-url.mjs <url> <key> [table]）
+├─ scripts\check-assessment-rls.mjs   評量表 RLS 行為驗證（node scripts\check-assessment-rls.mjs）
 ├─ src/
 │  ├─ main.tsx           React 掛載點
 │  ├─ App.tsx            首頁：依登入狀態切換使用者卡片／登入表單
@@ -175,7 +198,7 @@ supabase-app/
 
 ---
 
-## 6.1 版控與 GitHub
+## 7.1 版控與 GitHub
 
 儲存庫已初始化（主分支 `main`），`.env`、`node_modules/`、`dist/`、`1200E/` 都在
 `.gitignore` 排除，不會被 commit。推上 GitHub：
@@ -207,7 +230,7 @@ supabase()!
 
 ---
 
-## 7. 疑難排解
+## 8. 疑難排解
 
 | 症狀 | 處理 |
 | --- | --- |
