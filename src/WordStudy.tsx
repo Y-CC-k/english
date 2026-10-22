@@ -211,27 +211,45 @@ export default function WordStudy({ onBack }: { onBack: () => void }) {
         >
           教學模式
         </button>
-        {voiceOptions.length > 0 && (
-          <div className="ws-select-group">
-            <label htmlFor="ws-voice">語音：</label>
-            <select
-              id="ws-voice"
-              value={voiceName ?? ""}
-              onChange={(e) => {
-                const v = e.target.value || null;
-                setPreferredVoice(v);
-                setVoiceName(v);
-              }}
-            >
-              <option value="">預設（自動挑選）</option>
-              {voiceOptions.map((v) => (
-                <option key={v.name} value={v.name}>
-                  {v.name}（{v.lang}
-                  {v.local ? "，本機" : "，雲端"}）
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="ws-select-group">
+          <label htmlFor="ws-voice">語音：</label>
+          <select
+            id="ws-voice"
+            value={voiceName ?? ""}
+            disabled={voiceOptions.length === 0}
+            title={voiceOptions.length === 0 ? "本機沒有英文語音，無法挑選" : undefined}
+            onChange={(e) => {
+              const v = e.target.value || null;
+              setPreferredVoice(v);
+              setVoiceName(v);
+            }}
+          >
+            {voiceOptions.length === 0 ? (
+              <option value="">（這台機器沒有英文語音）</option>
+            ) : (
+              <>
+                <option value="">預設（自動挑選）</option>
+                {voiceOptions.map((v) => (
+                  <option key={v.name} value={v.name}>
+                    {v.name}（{v.lang}
+                    {v.local ? "，本機" : "，雲端"}）
+                  </option>
+                ))}
+              </>
+            )}
+          </select>
+        </div>
+        {voiceOptions.length > 0 ? null : (
+          <button
+            className="ws-teach-btn"
+            style={{ background: "linear-gradient(135deg, #4D9FFF, #4DFFF3)" }}
+            onClick={() => {
+              setVoiceOptions(listEnglishVoices());
+              setVoiceName(getPreferredVoiceName());
+            }}
+          >
+            🔄 重新掃描語音
+          </button>
         )}
       </div>
 
