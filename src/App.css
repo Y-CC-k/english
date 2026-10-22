@@ -21,7 +21,7 @@ body {
 
 h1 {
   margin: 0 0 4px;
-  font-size: 24px;
+  font-size: clamp(17px, 2.5vw + 10px, 24px); /* AWD：依視窗寬度自動縮放 */
 }
 
 .sub {
@@ -246,6 +246,7 @@ code {
   display: flex;
   gap: 12px;
   align-items: center;
+  flex-wrap: wrap; /* AWD：放不下自動換行 */
 }
 
 .topbar {
@@ -464,4 +465,38 @@ code {
 .del:disabled {
   color: #9ca3af;
   cursor: wait;
+}
+
+/* ---------- 響應式（AWD：自適應網頁設計） ---------- */
+
+/* ≤ 900px：平板直式以下 */
+@media (max-width: 900px) {
+  .lb-selects { flex-wrap: wrap; }
+  .lb-selects select { flex: 1 1 45%; }
+}
+
+/* ≤ 600px：大螢幕手機／小型平板 */
+@media (max-width: 600px) {
+  .wrap { padding: 16px 12px 40px; }
+
+  /* 首頁入口鈕：直排全寬，好點好按 */
+  .row { flex-direction: column; align-items: stretch; }
+  .row .btn { width: 100%; margin: 5px 0; padding: 13px 22px; font-size: 16px; }
+
+  /* 頁首：置中堆疊，標題不超出 */
+  .topbar { justify-content: center; text-align: center; }
+  .topbar-actions { justify-content: center; }
+
+  /* 排行榜篩選：一行一個，避免擠壓 */
+  .lb-selects select { flex: 1 1 100%; }
+  .lb { padding: 12px; }
+
+  /* 表單輸入 ≥16px：避免 iOS Safari 聚焦自動放大 */
+  .field input { font-size: 16px; }
+  .tabs { flex-wrap: wrap; }
+}
+
+/* 觸控裝置：點擊目標至少 44px，符合平板／手機操作 */
+@media (pointer: coarse) {
+  .btn, .login-btn, .guest-btn, .logout-btn { min-height: 44px; }
 }

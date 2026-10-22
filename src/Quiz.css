@@ -112,7 +112,7 @@
     padding: 18px 0;
 }
 
-.qz-prompt-chinese { font-size: 34px; font-weight: 700; margin: 0; }
+.qz-prompt-chinese { font-size: clamp(26px, 4vw + 12px, 34px); font-weight: 700; margin: 0; }
 
 .qz-play-big {
     width: 88px;
@@ -240,4 +240,12 @@
     .qz-grid2 { grid-template-columns: 1fr; }
     .qz-options { grid-template-columns: 1fr; }
     .qz-score-big { font-size: 56px; }
+    .qz-board-controls { grid-template-columns: 1fr 1fr; }
+    /* 輸入 ≥16px：避免 iOS Safari 聚焦自動放大 */
+    .qz-field input, .qz-field select { font-size: 16px; }
+}
+
+@media (max-width: 480px) {
+    .qz-board-controls { grid-template-columns: 1fr; }
+    .qz-play-big { width: 72px; height: 72px; font-size: 28px; }
 }
