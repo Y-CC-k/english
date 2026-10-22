@@ -49,7 +49,7 @@ export default function App() {
   const header = (
     <div className="topbar">
       <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center" }}>
-        <img src="/school-logo.png" alt="槺榔國小校徽" style={{ width: 56, height: 56, borderRadius: "50%", background: "#fff", padding: 3, boxShadow: "0 2px 10px rgba(0,0,0,0.2)" }} />
+        <img src="school-logo.png" alt="槺榔國小校徽" style={{ width: 56, height: 56, borderRadius: "50%", background: "#fff", padding: 3, boxShadow: "0 2px 10px rgba(0,0,0,0.2)" }} />
         <h1 style={{ margin: 0 }}>臺中市清水區槺榔國民小學英文單字學習網</h1>
       </div>
       {!session ? (
