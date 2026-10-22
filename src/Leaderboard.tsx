@@ -5,6 +5,7 @@ interface Row {
   name: string;
   grade: number;
   week: number;
+  qtype: string | null;
   score: number;
 }
 
@@ -25,7 +26,7 @@ export default function Leaderboard() {
     setLoading(true);
     void (async () => {
       try {
-        let query = sb.from("scores").select("name, grade, week, score");
+        let query = sb.from("scores").select("name, grade, week, qtype, score");
         if (grade) query = query.eq("grade", Number(grade));
         if (week) query = query.eq("week", Number(week));
         query = query.order("score", { ascending: false }).order("created_at", { ascending: false }).limit(10);
@@ -76,6 +77,7 @@ export default function Leaderboard() {
               <span className="lb-rank">{MEDALS[i] ?? `${i + 1}.`}</span>
               <b className="lb-name">{r.name}</b>
               <span className="lb-meta">{r.grade} 年級 · 第 {r.week} 週</span>
+              {r.qtype && <span className="lb-qtype">{r.qtype === "listen" ? "🎧" : "🔍"}</span>}
               <span className="lb-score">{r.score} 分</span>
             </li>
           ))}

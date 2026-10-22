@@ -146,11 +146,13 @@ npm.cmd run typecheck # 只跑 TypeScript 檢查
   題型：🎧 聽音選義（TTS 播單字→選中文）／🔍 看義選詞（顯中文→選單字）
 - **作答**：4 選項隨機；聽音題進題自動播音＋可重聽；答對亮綠、答錯亮紅並標正解，
   1.2 秒自動下一題
-- **收卷**：`scores` 寫入 `name／grade／week／score／detail`（逐題對錯 jsonb）；
+- **收卷**：`scores` 寫入 `name／grade／week／qtype／score／detail`（qtype：listen=聽音選義／
+  wordpick=看義選詞，2026-10-22 migration `add_qtype_to_scores` 加入；detail 為逐題對錯 jsonb）；
   `user_id` 由 DB `default auth.uid()` 填，前端不可代送
 - **成績板**：直接讀 `scores` 在前端聚合（2026-10-22 改版；`score_summary` view 留存）
-  — 可篩 **年級（全部／三～六）** 與 **週次**，排序可選 最佳分數／平均／考試次數／姓名；
-  「最近紀錄」列年級＋週次、最新 20 筆，自己那列高亮
+  — 可篩 **年級（全部／三〜六）**、**週次** 與 **題型（全部／聽音選義／看義選詞）**；
+  排序可選 最佳分數／平均／考試次數／姓名；「最近紀錄」列年級＋週次＋題型、最新 20 筆，
+  自己那列高亮；首頁排行榜在分數旁以 🎧／🔍 小徽章標示題型
 - 權限已驗證：登入者可寫自己的成績（201）／匿名讀 scores 為空 ✔
 - `scores.week` 欄位由 migration `add_week_to_scores` 加入
 - **訪客模式**：登入頁按「🎮 訪客模式」→ 預填共用帳號 `klnes@stu.klnes.tc.edu.tw`

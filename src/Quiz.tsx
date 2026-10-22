@@ -33,9 +33,12 @@ interface ScoreRow {
   name: string;
   grade: number;
   week: number;
+  qtype: string | null;
   score: number;
   created_at: string;
 }
+
+const QTYPE_LABEL: Record<string, string> = { listen: "🎧 聽音", wordpick: "🔍 看義" };
 
 interface BoardSummary {
   name: string;
@@ -97,6 +100,7 @@ export default function Quiz({ onBack, guest }: { onBack: () => void; guest?: bo
   const [bGrade, setBGrade] = useState("");   // "" = 全部年級
   const [bWeek, setBWeek] = useState("");     // "" = 全部週次
   const [bWeeks, setBWeeks] = useState<number[]>([]);
+  const [bType, setBType] = useState("");     // "" = 兩種題型都列
   const [bSort, setBSort] = useState("best"); // best / average / attempts / name
   const nextTimer = useRef<number | null>(null);
 
@@ -193,6 +197,7 @@ export default function Quiz({ onBack, guest }: { onBack: () => void; guest?: bo
         name: name.trim(),
         grade: Number(grade),
         week: Number(week),
+        qtype: listen ? "listen" : "wordpick",
         score: finalScore,
         detail: detailRef.current,
       });
@@ -215,15 +220,16 @@ export default function Quiz({ onBack, guest }: { onBack: () => void; guest?: bo
     setPhase("board");
   }
 
-  /** 依年級／週次撈原始紀錄並在前端聚合（summary 聚合、recent 取最新 20 筆） */
-  async function loadBoard(g: string, w: string) {
+  /** 依年級／週次／題型撈原始紀錄並在前端聚合（summary 聚合、recent 取最新 20 筆） */
+  async function loadBoard(g: string, w: string, t: string) {
     const sb = supabase();
     if (!sb) return;
     setLoading(true);
     try {
-      let query = sb.from("scores").select("name, grade, week, score, created_at");
+      let query = sb.from("scores").select("name, grade, week, qtype, score, created_at");
       if (g) query = query.eq("grade", Number(g));
       if (w) query = query.eq("week", Number(w));
+      if (t) query = query.eq("qtype", t);
       query = query.order("created_at", { ascending: false });
       const rows = unwrap<ScoreRow>(await query);
       setRecent(rows.slice(0, 20));
@@ -254,7 +260,7 @@ export default function Quiz({ onBack, guest }: { onBack: () => void; guest?: bo
 
   // 進成績板畫面時載入一次
   useEffect(() => {
-    if (phase === "board") void loadBoard(bGrade, bWeek);
+    if (phase === "board") void loadBoard(bGrade, bWeek, bType);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
@@ -426,7 +432,7 @@ export default function Quiz({ onBack, guest }: { onBack: () => void; guest?: bo
               <select
                 value={bGrade}
                 disabled={loading}
-                onChange={(e) => { setBGrade(e.target.value); setBWeek(""); void loadBoard(e.target.value, ""); }}
+                onChange={(e) => { setBGrade(e.target.value); setBWeek(""); void loadBoard(e.target.value, "", bType); }}
               >
                 <option value="">全部年級</option>
                 <option value="3">三年級</option>
@@ -440,10 +446,22 @@ export default function Quiz({ onBack, guest }: { onBack: () => void; guest?: bo
               <select
                 value={bWeek}
                 disabled={loading}
-                onChange={(e) => { setBWeek(e.target.value); void loadBoard(bGrade, e.target.value); }}
+                onChange={(e) => { setBWeek(e.target.value); void loadBoard(bGrade, e.target.value, bType); }}
               >
                 <option value="">全部週次</option>
                 {bWeeks.map((n) => <option key={n} value={n}>第 {n} 週</option>)}
+              </select>
+            </div>
+            <div className="qz-field">
+              <label>題型</label>
+              <select
+                value={bType}
+                disabled={loading}
+                onChange={(e) => { setBType(e.target.value); void loadBoard(bGrade, bWeek, e.target.value); }}
+              >
+                <option value="">全部題型</option>
+                <option value="listen">🎧 聽音選義</option>
+                <option value="wordpick">🔍 看義選詞</option>
               </select>
             </div>
             <div className="qz-field">
@@ -482,7 +500,7 @@ export default function Quiz({ onBack, guest }: { onBack: () => void; guest?: bo
           <div className="qz-table-wrap">
             <table className="qz-table">
               <thead>
-                <tr><th>時間</th><th>姓名</th><th>年級</th><th>週次</th><th>分數</th></tr>
+                <tr><th>時間</th><th>姓名</th><th>年級</th><th>週次</th><th>題型</th><th>分數</th></tr>
               </thead>
               <tbody>
                 {recent.map((r, i) => (
@@ -491,11 +509,12 @@ export default function Quiz({ onBack, guest }: { onBack: () => void; guest?: bo
                     <td>{r.name}</td>
                     <td className="num">{r.grade}</td>
                     <td className="num">第 {r.week} 週</td>
+                    <td>{r.qtype ? QTYPE_LABEL[r.qtype] ?? r.qtype : "—"}</td>
                     <td className="num">{r.score}</td>
                   </tr>
                 ))}
                 {recent.length === 0 && !loading && (
-                  <tr><td colSpan={5} className="qz-empty">沒有紀錄</td></tr>
+                  <tr><td colSpan={6} className="qz-empty">沒有紀錄</td></tr>
                 )}
               </tbody>
             </table>

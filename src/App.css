@@ -363,6 +363,11 @@ code {
   font-size: 12px;
 }
 
+.lb-qtype {
+  flex: none;
+  font-size: 13px;
+}
+
 .lb-score {
   margin-left: auto;
   font-weight: 700;
