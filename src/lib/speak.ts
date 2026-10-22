@@ -47,20 +47,7 @@ export function currentEnglishVoiceName(): string | null {
   return pickEnglishVoice()?.name ?? null;
 }
 
-/** 念單字：語速稍慢，讓小學生聽清楚。 */
-export function speakWord(word: string, rate = 0.85): void {
-  speak(word, rate);
-}
-
-/** 念例句：語速正常一點。 */
-export function speakSentence(sentence: string): void {
-  speak(sentence, 0.95);
-}
-
-function speak(text: string, rate: number): void {
-  if (!isSpeechSupported()) return;
-  const synth = window.speechSynthesis;
-  synth.cancel(); // 打斷上一段，避免考試音連著疊
+function utter(text: string, rate: number): SpeechSynthesisUtterance {
   const u = new SpeechSynthesisUtterance(text);
   u.lang = "en-US";
   u.rate = rate;
@@ -69,5 +56,56 @@ function speak(text: string, rate: number): void {
     u.voice = v;
     u.lang = v.lang;
   }
-  synth.speak(u);
+  return u;
+}
+
+/** 念單字：語速稍慢，讓小學生聽清楚。 */
+export function speakWord(word: string, rate = 0.85): void {
+  if (!isSpeechSupported()) return;
+  const synth = window.speechSynthesis;
+  synth.cancel();
+  synth.speak(utter(word, rate));
+}
+
+/** 念例句：語速正常一點。 */
+export function speakSentence(sentence: string): void {
+  if (!isSpeechSupported()) return;
+  const synth = window.speechSynthesis;
+  synth.cancel();
+  synth.speak(utter(sentence, 0.95));
+}
+
+/** 依序念一串（單字→停頓→例句），中間不互相打斷；結束或超時才 resolve。 */
+export function speakSequence(
+  parts: ReadonlyArray<{ text: string; rate?: number }>,
+  gapMs = 350,
+): Promise<void> {
+  if (!isSpeechSupported()) return Promise.resolve();
+  const synth = window.speechSynthesis;
+  synth.cancel();
+  return new Promise((resolve) => {
+    // 任何一段遺失 onend 事件也要解脫（瀏覽器 bug 產險）
+    const guard = window.setTimeout(() => done(), 15000);
+    function done() {
+      window.clearTimeout(guard);
+      resolve();
+    }
+    const play = (i: number) => {
+      if (i >= parts.length) return;
+      const { text, rate = 0.85 } = parts[i];
+      const u = utter(text, rate);
+      u.onend = () => {
+        if (i + 1 < parts.length) window.setTimeout(() => play(i + 1), gapMs);
+        else done();
+      };
+      u.onerror = () => done();
+      synth.speak(u);
+    };
+    play(0);
+  });
+}
+
+/** 停掉目前所有播音（教學模式退出／畫面切換用）。 */
+export function stopSpeech(): void {
+  if (isSpeechSupported()) window.speechSynthesis.cancel();
 }

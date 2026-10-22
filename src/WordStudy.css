@@ -1,0 +1,422 @@
+/* ============================================
+   單字學習（資料庫版）— Glassmorphism Anime
+   類別加 ws- 前綴，不與 App.css 衝突
+   ============================================ */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Poppins:wght@400;600;700;800&display=swap');
+
+.ws-root {
+    --ws-glass-bg: rgba(255, 255, 255, 0.08);
+    --ws-glass-bg-strong: rgba(255, 255, 255, 0.15);
+    --ws-glass-border: rgba(255, 255, 255, 0.18);
+    --ws-glass-border-strong: rgba(255, 255, 255, 0.3);
+    --ws-glass-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.4);
+
+    --ws-pink: #FF6B9D;
+    --ws-purple: #C44DFF;
+    --ws-blue: #4D9FFF;
+    --ws-cyan: #4DFFF3;
+    --ws-text: #FFFFFF;
+    --ws-text-2: rgba(255, 255, 255, 0.7);
+    --ws-text-3: rgba(255, 255, 255, 0.5);
+
+    --ws-gradient-pink-purple: linear-gradient(135deg, #FF6B9D, #C44DFF);
+    --ws-gradient-blue-cyan: linear-gradient(135deg, #4D9FFF, #4DFFF3);
+    --ws-gradient-rainbow: linear-gradient(135deg, #FF6B9D, #C44DFF, #4D9FFF, #4DFFF3);
+
+    font-family: 'Poppins', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--ws-text);
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* 浮動光球 */
+.ws-orbs {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.ws-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+    animation: ws-float 20s ease-in-out infinite;
+}
+
+.ws-orb-1 { width: 600px; height: 600px; background: var(--ws-pink); top: -200px; left: -200px; }
+.ws-orb-2 { width: 500px; height: 500px; background: var(--ws-purple); bottom: -150px; right: -150px; animation-delay: -5s; }
+.ws-orb-3 { width: 400px; height: 400px; background: var(--ws-blue); top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: -10s; }
+.ws-orb-4 { width: 300px; height: 300px; background: var(--ws-cyan); top: 20%; right: 10%; animation-delay: -15s; }
+
+@keyframes ws-float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(50px, -50px) scale(1.1); }
+    50% { transform: translate(-30px, 30px) scale(0.9); }
+    75% { transform: translate(30px, 50px) scale(1.05); }
+}
+
+.ws-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 16px 24px;
+    background: var(--ws-glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--ws-glass-border);
+}
+
+.ws-header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.ws-header-brand { display: flex; align-items: center; gap: 12px; }
+
+.ws-header-logo {
+    width: 44px;
+    height: 44px;
+    background: var(--ws-gradient-pink-purple);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 20px;
+    color: white;
+    box-shadow: 0 4px 16px rgba(255, 107, 157, 0.4);
+}
+
+.ws-header-title {
+    font-size: 20px;
+    font-weight: 700;
+    background: var(--ws-gradient-rainbow);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+}
+
+.ws-header-subtitle { font-size: 14px; color: var(--ws-text-2); margin: 0; }
+
+.ws-back-btn {
+    padding: 8px 18px;
+    background: var(--ws-glass-bg-strong);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--ws-glass-border);
+    border-radius: 9999px;
+    color: var(--ws-text);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 150ms ease-out;
+    font-family: inherit;
+}
+
+.ws-back-btn:hover { border-color: var(--ws-glass-border-strong); background: rgba(255, 255, 255, 0.22); }
+
+/* 控制列 */
+.ws-controls {
+    max-width: 1400px;
+    margin: 24px auto 0;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+}
+
+.ws-select-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    background: var(--ws-glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--ws-glass-border);
+    border-radius: 9999px;
+}
+
+.ws-select-group label { font-size: 14px; font-weight: 600; color: var(--ws-text-2); white-space: nowrap; }
+
+.ws-select-group select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 8px 16px;
+    background: var(--ws-glass-bg-strong);
+    border: 1px solid var(--ws-glass-border);
+    border-radius: 9999px;
+    color: var(--ws-text);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    min-width: 130px;
+    font-family: inherit;
+}
+
+.ws-select-group select:hover { border-color: var(--ws-glass-border-strong); background: rgba(255, 255, 255, 0.2); }
+.ws-select-group select:focus { outline: none; border-color: var(--ws-cyan); box-shadow: 0 0 0 3px rgba(77, 255, 243, 0.2); }
+.ws-select-group select:disabled { opacity: 0.5; cursor: not-allowed; }
+.ws-select-group select option { background: #1a1a2e; color: white; }
+
+/* 教學模式按鈕 */
+.ws-teach-btn {
+    padding: 12px 24px;
+    background: var(--ws-gradient-pink-purple);
+    color: white;
+    border: none;
+    border-radius: 9999px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(255, 107, 157, 0.4);
+    letter-spacing: 0.02em;
+    font-family: inherit;
+}
+
+.ws-teach-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 6px 24px rgba(255, 107, 157, 0.6); }
+.ws-teach-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+/* 單字卡列表 */
+.ws-grid {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 24px 80px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.ws-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px;
+    color: var(--ws-text-2);
+    font-size: 18px;
+    margin: 0;
+}
+
+/* 單字卡 */
+.ws-card {
+    position: relative;
+    background: var(--ws-glass-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--ws-glass-border);
+    border-radius: 24px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: all 300ms ease-out;
+    overflow: hidden;
+}
+
+.ws-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.ws-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--ws-glass-border-strong);
+    box-shadow: var(--ws-glass-shadow-lg);
+}
+
+.ws-card-info { flex: 1; text-align: center; }
+
+.ws-card-word {
+    font-size: 32px;
+    font-weight: 800;
+    background: var(--ws-gradient-rainbow);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.ws-card-phonetic {
+    font-size: 14px;
+    color: var(--ws-text-3);
+    font-family: 'SF Mono', Consolas, monospace;
+    min-height: 21px;
+}
+
+.ws-card-details { font-size: 18px; font-weight: 500; }
+
+.ws-card-pos {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--ws-gradient-pink-purple);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 9999px;
+    margin-right: 8px;
+    box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3);
+}
+
+.ws-card-sentence {
+    font-size: 14px;
+    color: var(--ws-text-2);
+    font-style: italic;
+    line-height: 1.5;
+    margin: 12px 0 0;
+    min-height: 21px;
+}
+
+.ws-play-btn {
+    width: 56px;
+    height: 56px;
+    background: var(--ws-gradient-blue-cyan);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-self: center;
+    transition: all 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 4px 16px rgba(77, 159, 255, 0.4);
+    font-family: inherit;
+}
+
+.ws-play-btn:hover { transform: scale(1.1); box-shadow: 0 6px 24px rgba(77, 159, 255, 0.6); }
+.ws-play-btn:active { transform: scale(0.95); }
+.ws-play-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* 教學模式全螢幕 */
+.ws-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 12, 41, 0.88);
+    backdrop-filter: blur(24px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.ws-modal-card {
+    width: min(92vw, 700px);
+    background: var(--ws-glass-bg-strong);
+    border: 1px solid var(--ws-glass-border-strong);
+    border-radius: 32px;
+    padding: 48px 40px;
+    box-shadow: var(--ws-glass-shadow-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+}
+
+.ws-modal-word {
+    font-size: clamp(48px, 13vw, 110px);
+    line-height: 1.15;
+    font-weight: 800;
+    background: var(--ws-gradient-rainbow);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+    word-break: break-word;
+}
+
+.ws-modal-phonetic { font-size: 20px; color: var(--ws-text-3); font-family: 'SF Mono', Consolas, monospace; }
+.ws-modal-details { font-size: 24px; font-weight: 500; }
+.ws-modal-sentence { font-size: 18px; color: var(--ws-text-2); font-style: italic; }
+
+.ws-modal-play {
+    width: 72px;
+    height: 72px;
+    font-size: 32px;
+    align-self: center;
+}
+
+.ws-modal-nav {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.ws-modal-nav button {
+    padding: 8px 20px;
+    background: var(--ws-glass-bg);
+    border: 1px solid var(--ws-glass-border);
+    border-radius: 9999px;
+    color: var(--ws-text-2);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.ws-modal-nav button:hover { color: var(--ws-text); border-color: var(--ws-glass-border-strong); }
+
+.ws-modal-count {
+    font-size: 13px;
+    color: var(--ws-text-3);
+    letter-spacing: 0.1em;
+}
+
+.ws-close-btn {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ws-glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--ws-glass-border);
+    border-radius: 50%;
+    color: var(--ws-text-2);
+    cursor: pointer;
+    font-size: 24px;
+    font-family: inherit;
+}
+
+.ws-close-btn:hover { background: var(--ws-glass-bg-strong); color: var(--ws-text); border-color: var(--ws-glass-border-strong); }
+
+/* RWD */
+@media (max-width: 768px) {
+    .ws-header-content { flex-direction: column; gap: 8px; text-align: center; }
+    .ws-controls { flex-direction: column; align-items: stretch; }
+    .ws-select-group { justify-content: space-between; }
+    .ws-grid { grid-template-columns: 1fr; padding: 16px; position: relative; }
+    .ws-modal-card { padding: 32px 20px; margin: 16px; }
+}
+
+:focus-visible { outline: 2px solid #4DFFF3; outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+    .ws-root *, .ws-root *::before, .ws-root *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

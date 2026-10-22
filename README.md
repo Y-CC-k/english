@@ -126,6 +126,17 @@ npm.cmd run typecheck # 只跑 TypeScript 檢查
   - `node scripts\seed-words.cjs` 重灌：走一次性 RPC（先 clear 該年級再 upsert）；
     RPC 已於灌入後刪除，重灌前需重建（secret 讀自 `.env` 的 `SUPA_SEED_SECRET`）
 - 權限行為已實測：匿名讀 words ✔／讀 scores 空 ✔／兩邊匿名寫入都被擋 ✔
+
+### 6.1 單字學習頁（資料庫版 glassmorphism）
+
+`src/WordStudy.tsx` 重現 `1200_ENGLISH/glassmorphism-anime.html` 的介面與行程，
+改為**資料來源 = Supabase `words` 表**（不再讀 JSON 檔）：
+
+- 選年級 → 查 `words` 的 distinct 週次；選週次 → 撈該週單字（依 word 排序）
+- 每卡播音 = 瀏覽器語音合成（`lib/speak.ts`，不需音檔）：單字（慢速）→ 停頓 → 例句
+- 「教學模式」= 全螢幕逐字 AUTO 播放（播完 1.5 秒自動下一位），可上一位／下一位／Esc 關閉
+- 登入前後都可用（words 公開可讀），首頁有「📚 單字學習（資料庫版）」按鈕進入
+- 已實測（內建瀏覽器）：grade6 第 5 週 11 張卡、自動播放逐位推進 ✔
 - ⚠️ 2026-10-22：前一版 1200E 資料區誤傳刪除，已重傳為 `1200_ENGLISH/`（僅 JSON、無音檔）並重灌
 
 ---
@@ -145,12 +156,15 @@ supabase-app/
 │  ├─ main.tsx           React 掛載點
 │  ├─ App.tsx            首頁：依登入狀態切換使用者卡片／登入表單
 │  ├─ AuthForms.tsx      登入／註冊／忘記密碼表單
+│  ├─ WordStudy.tsx      單字學習頁（資料庫版 glassmorphism，見 6.1）
+│  ├─ WordStudy.css      其玻璃風格樣式（ws- 前綴）
 │  ├─ ConnectTest.tsx    連線三項測試（可收合）
 │  ├─ App.css
 │  ├─ vite-env.d.ts      環境變數的型別宣告
 │  └─ lib/
 │     ├─ supabase.ts     Supabase client（單例，從 import.meta.env 讀設定）
-│     └─ auth.ts         登入／註冊／登出／session 訂閱與錯誤中文化
+│     ├─ auth.ts         登入／註冊／登出／session 訂閱與錯誤中文化
+│     └─ speak.ts        瀏覽器語音合成（單字／例句／序列播放，不需音檔）
 ├─ 1200_ENGLISH/          1200 單字資料區（使用者自行整理；版控排除）
 │  ├─ document/          grade3~6.json 單字資料（週次 → word/phonetic/pos/chinese/sentence）
 │  └─ index.html 等      原本的單字瀏覽靜態頁（重傳版未含音檔）

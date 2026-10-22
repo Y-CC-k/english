@@ -5,6 +5,7 @@ import { getSession, onAuthChange, signOut } from "./lib/auth";
 import { speakWord, speakSentence, isSpeechSupported, ensureVoice, currentEnglishVoiceName } from "./lib/speak";
 import AuthForms from "./AuthForms";
 import ConnectTest from "./ConnectTest";
+import WordStudy from "./WordStudy";
 
 function maskKey(key: string) {
   return key.length <= 10 ? "…" : key.slice(0, 6) + "…" + key.slice(-6);
@@ -15,6 +16,7 @@ export default function App() {
   const [ready, setReady] = useState(false);
   const [showTest, setShowTest] = useState(false);
   const [voiceName, setVoiceName] = useState<string | null>(null);
+  const [showWords, setShowWords] = useState(false);
   const { url, key } = loadConfig();
 
   // 啟動：先讀一次 session，之後由 onAuthStateChange 接手更新
@@ -71,6 +73,13 @@ export default function App() {
   // 已登入
   if (session) {
     const user = session.user;
+    if (showWords) {
+      return (
+        <main>
+          <WordStudy onBack={() => setShowWords(false)} />
+        </main>
+      );
+    }
     return (
       <main className="wrap">
         {header}
@@ -106,6 +115,11 @@ export default function App() {
               </button>
             </div>
           )}
+          <div className="row">
+            <button className="btn" onClick={() => setShowWords(true)}>
+              📚 單字學習（資料庫版）
+            </button>
+          </div>
         </div>
         {showTest && <ConnectTest />}
       </main>
@@ -113,10 +127,20 @@ export default function App() {
   }
 
   // 未登入：表單 + 可收合的連線測試
+  if (showWords) {
+    return (
+      <main>
+        <WordStudy onBack={() => setShowWords(false)} />
+      </main>
+    );
+  }
   return (
     <main className="wrap">
       {header}
       <AuthForms />
+      <button className="ghost" onClick={() => setShowWords(true)}>
+        📚 單字學習（資料庫版）
+      </button>
       <button className="ghost" onClick={() => setShowTest((v) => !v)}>
         {showTest ? "隱藏連線測試" : "顯示連線測試"}
       </button>
