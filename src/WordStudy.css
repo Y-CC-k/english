@@ -131,7 +131,7 @@
 .ws-controls {
     max-width: 1400px;
     margin: 24px auto 0;
-    padding: 16px 24px;
+    padding: 16px 24px 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -140,6 +140,17 @@
     position: relative;
     z-index: 1;
 }
+
+/* 提示卡列（控制列下方獨立一列） */
+.ws-hint-row {
+    display: flex;
+    justify-content: center;
+    padding: 16px 24px 0;
+    position: relative;
+    z-index: 1;
+}
+
+.ws-hint-row .ws-hint { margin: 0; }
 
 .ws-select-group {
     display: flex;

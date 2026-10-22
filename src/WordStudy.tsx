@@ -204,13 +204,6 @@ export default function WordStudy({ onBack }: { onBack: () => void }) {
             ))}
           </select>
         </div>
-        <button
-          className="ws-teach-btn"
-          disabled={!canTeach}
-          onClick={() => { setTeachIndex(0); setTeaching(true); }}
-        >
-          教學模式
-        </button>
         <div className="ws-select-group">
           <label htmlFor="ws-voice">語音：</label>
           <select
@@ -239,47 +232,57 @@ export default function WordStudy({ onBack }: { onBack: () => void }) {
             )}
           </select>
         </div>
-        {voiceOptions.length > 0 ? null : (
-          <>
-            <div className="ws-hint">
-              <p className="ws-hint-title">
-                🎙️ 這台機器還沒有英文語音 — 目前會退化用中文語音念英文（口音偏中文）。
-              </p>
-              <ol className="ws-hint-steps">
-                <li>
-                  <b>最快見效：</b>改用 <b>Microsoft Edge</b> 開本頁（它內建線上自然語音
-                  Aria／Jenny／Emma，像真人），進頁面後按「🔄 重新掃描語音」
-                </li>
-                <li>
-                  <b>Chrome：</b>保持連網，清單裡通常有「Google US English」雲端語音；
-                  若沒有，重開瀏覽器再掃一次
-                </li>
-                <li>
-                  <b>一次到位（沒網也能念）：</b>安裝 Windows 英文語音包 ──
-                  設定 → 時間與語言 → 語言與地區 → <b>English (United States)</b> →
-                  語言選項 → 勾選下載「<b>文字轉語音</b>」
-                  <a className="ws-hint-link" href="ms-settings:regionlanguage">
-                    🔗 直接開啟 Windows 設定
-                  </a>
-                </li>
-              </ol>
-              <p className="ws-hint-foot">
-                裝好語音後<b>把瀏覽器關掉重開</b>，再按「🔄 重新掃描語音」就會出現在選單裡。
-              </p>
-            </div>
-            <button
-              className="ws-teach-btn"
-              style={{ background: "linear-gradient(135deg, #4D9FFF, #4DFFF3)" }}
-              onClick={() => {
-                setVoiceOptions(listEnglishVoices());
-                setVoiceName(getPreferredVoiceName());
-              }}
-            >
-              🔄 重新掃描語音
-            </button>
-          </>
+        <button
+          className="ws-teach-btn"
+          disabled={!canTeach}
+          onClick={() => { setTeachIndex(0); setTeaching(true); }}
+        >
+          教學模式
+        </button>
+        {voiceOptions.length === 0 && (
+          <button
+            className="ws-teach-btn"
+            style={{ background: "linear-gradient(135deg, #4D9FFF, #4DFFF3)" }}
+            onClick={() => {
+              setVoiceOptions(listEnglishVoices());
+              setVoiceName(getPreferredVoiceName());
+            }}
+          >
+            🔄 重新掃描語音
+          </button>
         )}
       </div>
+
+      {voiceOptions.length === 0 && (
+        <div className="ws-hint-row">
+          <div className="ws-hint">
+            <p className="ws-hint-title">
+              🎙️ 這台機器還沒有英文語音 — 目前會退化用中文語音念英文（口音偏中文）。
+            </p>
+            <ol className="ws-hint-steps">
+              <li>
+                <b>最快見效：</b>改用 <b>Microsoft Edge</b> 開本頁（它內建線上自然語音
+                Aria／Jenny／Emma，像真人），進頁面後按「🔄 重新掃描語音」
+              </li>
+              <li>
+                <b>Chrome：</b>保持連網，清單裡通常有「Google US English」雲端語音；
+                若沒有，重開瀏覽器再掃一次
+              </li>
+              <li>
+                <b>一次到位（沒網也能念）：</b>安裝 Windows 英文語音包 ──
+                設定 → 時間與語言 → 語言與地區 → <b>English (United States)</b> →
+                語言選項 → 勾選下載「<b>文字轉語音</b>」
+                <a className="ws-hint-link" href="ms-settings:regionlanguage">
+                  🔗 直接開啟 Windows 設定
+                </a>
+              </li>
+            </ol>
+            <p className="ws-hint-foot">
+              裝好語音後<b>把瀏覽器關掉重開</b>，再按「🔄 重新掃描語音」就會出現在選單裡。
+            </p>
+          </div>
+        </div>
+      )}
 
       <main className="ws-grid" role="main">
         {(loadingWeeks || loadingWords) && <p className="ws-message">正在載入…</p>}
