@@ -17,7 +17,7 @@ export default function App() {
   const [showQuiz, setShowQuiz] = useState(false);
   const [quizBoard, setQuizBoard] = useState(false); // true = 直接開成績板（跳過準備頁）
   const [loginOpen, setLoginOpen] = useState(false);
-  const [role, setRole] = useState<string | null>(null); // profiles.role：student / teacher
+  const [role, setRole] = useState<number | null>(null); // profiles.role：0=學生 1=老師
   const guestUser = session?.user.email === GUEST_EMAIL;
 
   // 訪客帳號登入成功 → 直接帶進評量頁（不用再按）
@@ -51,7 +51,7 @@ export default function App() {
     if (!session?.user.id || !sb) { setRole(null); return; }
     let alive = true;
     sb.from("profiles").select("role").eq("id", session.user.id).single()
-      .then(({ data }) => { if (alive) setRole((data as { role: string } | null)?.role ?? null); });
+      .then(({ data }) => { if (alive) setRole((data as { role: number } | null)?.role ?? 0); });
     return () => { alive = false; };
   }, [session?.user.id]);
 
@@ -100,7 +100,7 @@ export default function App() {
             onBack={() => { setShowQuiz(false); setQuizBoard(false); }}
             guest={guestUser}
             accountName={guestUser ? undefined : (session.user.email ?? undefined)}
-            teacher={!guestUser && role === "teacher"}
+            teacher={!guestUser && role === 1}
             initialBoard={quizBoard}
           />
         </main>
