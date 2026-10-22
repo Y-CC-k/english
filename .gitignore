@@ -1,0 +1,16 @@
+node_modules/
+dist/
+*.log
+.env
+.env.*.local
+
+# 系統雜物
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# 原始 zip（已解開）
+*.zip
+
+# 1200E 資料區：使用者自行整理中，整理完成後再納入版控
+1200E/
