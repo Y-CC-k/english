@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "./lib/supabase";
-import { speakSequence, stopSpeech } from "./lib/speak";
+import {
+  speakSequence,
+  stopSpeech,
+  listEnglishVoices,
+  setPreferredVoice,
+  getPreferredVoiceName,
+} from "./lib/speak";
 import "./WordStudy.css";
 
 interface WordRow {
@@ -37,6 +43,20 @@ export default function WordStudy({ onBack }: { onBack: () => void }) {
   const [teaching, setTeaching] = useState(false);
   const [teachIndex, setTeachIndex] = useState(0);
   const teachTimer = useRef<number | null>(null);
+
+  // 語音清單（異步載入 + 系統語音變動時刷新）
+  const [voiceOptions, setVoiceOptions] = useState(listEnglishVoices());
+  const [voiceName, setVoiceName] = useState<string | null>(getPreferredVoiceName());
+  useEffect(() => {
+    if (!("speechSynthesis" in window)) return;
+    const refresh = () => {
+      setVoiceOptions(listEnglishVoices());
+      setVoiceName(getPreferredVoiceName());
+    };
+    refresh();
+    window.speechSynthesis.addEventListener("voiceschanged", refresh);
+    return () => window.speechSynthesis.removeEventListener("voiceschanged", refresh);
+  }, []);
 
   /* ── 選年級 → 從 words 表撈該年級有哪些週 ─────────── */
   async function handleGradeChange(g: string) {
@@ -191,6 +211,28 @@ export default function WordStudy({ onBack }: { onBack: () => void }) {
         >
           教學模式
         </button>
+        {voiceOptions.length > 0 && (
+          <div className="ws-select-group">
+            <label htmlFor="ws-voice">語音：</label>
+            <select
+              id="ws-voice"
+              value={voiceName ?? ""}
+              onChange={(e) => {
+                const v = e.target.value || null;
+                setPreferredVoice(v);
+                setVoiceName(v);
+              }}
+            >
+              <option value="">預設（自動挑選）</option>
+              {voiceOptions.map((v) => (
+                <option key={v.name} value={v.name}>
+                  {v.name}（{v.lang}
+                  {v.local ? "，本機" : "，雲端"}）
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       <main className="ws-grid" role="main">

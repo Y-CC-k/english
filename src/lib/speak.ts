@@ -7,11 +7,52 @@
 
 let cachedVoice: SpeechSynthesisVoice | null | undefined;
 
-/** 挑一個合适的英文語音（優先 Google / Microsoft 美式，再退回任何 en-*）。 */
+/** 使用者自選語音（存在 localStorage，跨頁面保留） */
+const VOICE_PREF_KEY = "ws-voice-name";
+let preferredVoiceName: string | null = null;
+try {
+  preferredVoiceName = window.localStorage.getItem(VOICE_PREF_KEY);
+} catch {
+  /* localStorage 不可用就算了 */
+}
+
+/** 選定語音（null = 回自動挑選）。選了不存在的名稱會自動退回自動模式。 */
+export function setPreferredVoice(name: string | null): void {
+  preferredVoiceName = name;
+  cachedVoice = undefined;
+  try {
+    if (name) window.localStorage.setItem(VOICE_PREF_KEY, name);
+    else window.localStorage.removeItem(VOICE_PREF_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function getPreferredVoiceName(): string | null {
+  return preferredVoiceName;
+}
+
+/** 列出本機所有英文語音（給語音選單用）。 */
+export function listEnglishVoices(): Array<{ name: string; lang: string; local: boolean }> {
+  return (window.speechSynthesis?.getVoices() ?? [])
+    .filter((v) => /^en(-|_)?/i.test(v.lang))
+    .map((v) => ({ name: v.name, lang: v.lang, local: v.localService }));
+}
+
+/** 挑一個合适的英文語音：使用者選定 > 自動順位。 */
 function pickEnglishVoice(): SpeechSynthesisVoice | null {
   if (cachedVoice !== undefined) return cachedVoice;
   const voices = window.speechSynthesis?.getVoices() ?? [];
   const en = voices.filter((v) => /^en(-|_)?/i.test(v.lang));
+  if (preferredVoiceName) {
+    const chosen = en.find((v) => v.name === preferredVoiceName);
+    if (chosen) {
+      cachedVoice = chosen;
+      return chosen;
+    }
+    // 選的語音在這台機器不存在（換了電腦）→ 退回自動
+    preferredVoiceName = null;
+  }
   cachedVoice =
     en.find((v) => /google us english/i.test(v.name)) ??
     en.find((v) => /microsoft.*(zira|david|aria|jenny)/i.test(v.name)) ??
