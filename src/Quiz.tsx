@@ -343,7 +343,10 @@ export default function Quiz({ onBack, guest }: { onBack: () => void; guest?: bo
             </button>
           </div>
           <p className="qz-score-sub">
-            {week && `這一週有 ${weekSubset.length} 字`}　·　評量結束會自動存進全班成績板
+            {week && `這一週有 ${weekSubset.length} 字`}
+            {week && count !== "all" && Number(count) > weekSubset.length
+              && `　⚠️ 選題不足 → 以本週最大值 ${weekSubset.length} 題進行`}
+            　·　評量結束會自動存進全班成績板
           </p>
         </div>
       )}
