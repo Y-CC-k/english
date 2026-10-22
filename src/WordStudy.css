@@ -99,6 +99,16 @@
     box-shadow: 0 4px 16px rgba(255, 107, 157, 0.4);
 }
 
+.ws-header-logo-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #ffffff;
+    padding: 3px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    flex-shrink: 0;
+}
+
 .ws-header-title {
     font-size: 20px;
     font-weight: 700;

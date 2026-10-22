@@ -167,10 +167,10 @@ export default function WordStudy({ onBack }: { onBack: () => void }) {
       <header className="ws-header" role="banner">
         <div className="ws-header-content">
           <div className="ws-header-brand">
-            <div className="ws-header-logo" aria-hidden="true">V</div>
+            <img className="ws-header-logo-img" src="/school-logo.png" alt="槺榔國小校徽" aria-hidden="true" />
             <div>
-              <h1 className="ws-header-title">英文單字學習網（資料庫版）</h1>
-              <p className="ws-header-subtitle">臺中市清水區槺榔國民小學 · Supabase words</p>
+              <h1 className="ws-header-title">臺中市清水區槺榔國民小學英文單字學習網</h1>
+              <p className="ws-header-subtitle">1200 英語單字 · 教學模式 · Supabase words</p>
             </div>
           </div>
           <button className="ws-back-btn" onClick={onBack}>← 返回</button>

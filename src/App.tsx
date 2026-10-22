@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { loadConfig, supabase } from "./lib/supabase";
+import { supabase } from "./lib/supabase";
 import { getSession, onAuthChange, signOut } from "./lib/auth";
 import { speakWord, speakSentence, isSpeechSupported, ensureVoice, currentEnglishVoiceName } from "./lib/speak";
 import AuthForms from "./AuthForms";
@@ -10,10 +10,6 @@ import Quiz from "./Quiz";
 
 /** 訪客模式共用帳號（Dashboard 手動建立；成績以暱稱記錄；密碼由使用者登入時輸入） */
 const GUEST_EMAIL = "klnes@stu.klnes.tc.edu.tw";
-
-function maskKey(key: string) {
-  return key.length <= 10 ? "…" : key.slice(0, 6) + "…" + key.slice(-6);
-}
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -29,7 +25,6 @@ export default function App() {
   useEffect(() => {
     if (guestUser && !showQuiz && !showWords) setShowQuiz(true);
   }, [guestUser, session?.user.id, showQuiz, showWords]);
-  const { url, key } = loadConfig();
 
   // 啟動：先讀一次 session，之後由 onAuthStateChange 接手更新
   useEffect(() => {
@@ -55,13 +50,11 @@ export default function App() {
 
   const header = (
     <>
-      <h1>Supabase 連線骨架</h1>
-      <p className="sub">Vite + React + TypeScript + @supabase/supabase-js</p>
-      {url && key && (
-        <p className="url">
-          URL：<code>{url}</code>　key：<code>{maskKey(key)}</code>
-        </p>
-      )}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center" }}>
+        <img src="/school-logo.png" alt="槺榔國小校徽" style={{ width: 56, height: 56, borderRadius: "50%", background: "#fff", padding: 3, boxShadow: "0 2px 10px rgba(0,0,0,0.2)" }} />
+        <h1 style={{ margin: 0 }}>臺中市清水區槺榔國民小學英文單字學習網</h1>
+      </div>
+      <p className="sub">1200 英語單字 · 個人／訪客雙模式 · Supabase</p>
     </>
   );
 
