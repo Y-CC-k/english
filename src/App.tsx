@@ -3,7 +3,6 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./lib/supabase";
 import { getSession, onAuthChange, signOut } from "./lib/auth";
 import AuthForms from "./AuthForms";
-import ConnectTest from "./ConnectTest";
 import Leaderboard from "./Leaderboard";
 import WordStudy from "./WordStudy";
 import Quiz from "./Quiz";
@@ -14,7 +13,6 @@ const GUEST_EMAIL = "klnes@stu.klnes.tc.edu.tw";
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [ready, setReady] = useState(false);
-  const [showTest, setShowTest] = useState(false);
   const [showWords, setShowWords] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [guestLogin, setGuestLogin] = useState(false);
@@ -53,9 +51,14 @@ export default function App() {
         <h1 style={{ margin: 0 }}>臺中市清水區槺榔國民小學英文單字學習網</h1>
       </div>
       {!session ? (
-        <button className="login-btn" onClick={() => setLoginOpen((v) => !v)}>
-          🔐 登入
-        </button>
+        <div className="topbar-actions">
+          <button className="login-btn" onClick={() => { setGuestLogin(false); setLoginOpen(true); }}>
+            🔐 登入
+          </button>
+          <button className="guest-btn" onClick={() => { setLoginOpen(true); setGuestLogin(true); }}>
+            🎮 訪客模式
+          </button>
+        </div>
       ) : (
         <button className="logout-btn" onClick={() => { void signOut(); }}>
           登出
@@ -117,14 +120,7 @@ export default function App() {
     );
   }
 
-  // 未登入：表單 + 可收合的連線測試
-  if (showWords) {
-    return (
-      <main>
-        <WordStudy onBack={() => setShowWords(false)} />
-      </main>
-    );
-  }
+  // 未登入：登入／訪客表單
   return (
     <main className="wrap">
       {header}
@@ -140,20 +136,8 @@ export default function App() {
           </button>
         </>
       ) : (
-        <>
-          <AuthForms key="standard" />
-          <button className="ghost" onClick={() => setGuestLogin(true)}>
-            🎮 訪客模式（免註冊，成績以暱稱記錄）
-          </button>
-        </>
+        <AuthForms key="standard" />
       ))}
-      <button className="ghost" onClick={() => setShowWords(true)}>
-        📚 單字學習（資料庫版）
-      </button>
-      <button className="ghost" onClick={() => setShowTest((v) => !v)}>
-        {showTest ? "隱藏連線測試" : "顯示連線測試"}
-      </button>
-      {showTest && <ConnectTest />}
     </main>
   );
 }
