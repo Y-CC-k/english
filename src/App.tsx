@@ -8,8 +8,8 @@ import ConnectTest from "./ConnectTest";
 import WordStudy from "./WordStudy";
 import Quiz from "./Quiz";
 
-/** 訪客模式共用帳號（Dashboard 手動建立；成績以暱稱記錄） */
-const GUEST_EMAIL = "classguest@st.tc.edu.tw";
+/** 訪客模式共用帳號（Dashboard 手動建立；成績以暱稱記錄；密碼由使用者登入時輸入） */
+const GUEST_EMAIL = "klnes@stu.klnes.tc.edu.tw";
 
 function maskKey(key: string) {
   return key.length <= 10 ? "…" : key.slice(0, 6) + "…" + key.slice(-6);
@@ -166,7 +166,7 @@ export default function App() {
         <>
           <AuthForms
             initialEmail={GUEST_EMAIL}
-            guestHint="訪客模式：輸入訪客帳號密碼登入（Email 已填好），成績會以你輸入的暱稱記錄。"
+            guestHint="訪客模式：Email 已填好，請輸入訪客密碼登入；成績會以你輸入的暱稱記錄。"
           />
           <button className="ghost" onClick={() => setGuestLogin(false)}>
             ← 改用個人帳號
