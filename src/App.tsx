@@ -16,7 +16,7 @@ export default function App() {
   const [showWords, setShowWords] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [guestLogin, setGuestLogin] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(true);
+  const [loginOpen, setLoginOpen] = useState(false);
   const guestUser = session?.user.email === GUEST_EMAIL;
 
   // 訪客帳號登入成功 → 直接帶進評量頁（不用再按）
@@ -52,10 +52,16 @@ export default function App() {
       </div>
       {!session ? (
         <div className="topbar-actions">
-          <button className="login-btn" onClick={() => { setGuestLogin(false); setLoginOpen(true); }}>
+          <button className="login-btn" onClick={() => {
+            if (loginOpen && !guestLogin) setLoginOpen(false);
+            else { setGuestLogin(false); setLoginOpen(true); }
+          }}>
             🔐 登入
           </button>
-          <button className="guest-btn" onClick={() => { setLoginOpen(true); setGuestLogin(true); }}>
+          <button className="guest-btn" onClick={() => {
+            if (loginOpen && guestLogin) setLoginOpen(false);
+            else { setLoginOpen(true); setGuestLogin(true); }
+          }}>
             🎮 訪客模式
           </button>
         </div>
@@ -120,7 +126,7 @@ export default function App() {
     );
   }
 
-  // 未登入：登入／訪客表單
+  // 未登入：登入／訪客表單 + 公開排行榜
   return (
     <main className="wrap">
       {header}
@@ -138,6 +144,7 @@ export default function App() {
       ) : (
         <AuthForms key="standard" />
       ))}
+      <Leaderboard />
     </main>
   );
 }
