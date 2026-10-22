@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./lib/supabase";
-import { getSession, onAuthChange, signOut } from "./lib/auth";
-import { speakWord, speakSentence, isSpeechSupported, ensureVoice, currentEnglishVoiceName } from "./lib/speak";
+import { getSession, onAuthChange } from "./lib/auth";
 import AuthForms from "./AuthForms";
 import ConnectTest from "./ConnectTest";
 import WordStudy from "./WordStudy";
@@ -15,7 +14,6 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [ready, setReady] = useState(false);
   const [showTest, setShowTest] = useState(false);
-  const [voiceName, setVoiceName] = useState<string | null>(null);
   const [showWords, setShowWords] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [guestLogin, setGuestLogin] = useState(false);
@@ -40,8 +38,6 @@ export default function App() {
       }
     });
     const off = onAuthChange((s) => setSession(s));
-    ensureVoice(() => setVoiceName(currentEnglishVoiceName())); // 英文語音清單異步載入，先觸發一次
-    setVoiceName(currentEnglishVoiceName());
     return () => {
       alive = false;
       off();
@@ -54,7 +50,6 @@ export default function App() {
         <img src="/school-logo.png" alt="槺榔國小校徽" style={{ width: 56, height: 56, borderRadius: "50%", background: "#fff", padding: 3, boxShadow: "0 2px 10px rgba(0,0,0,0.2)" }} />
         <h1 style={{ margin: 0 }}>臺中市清水區槺榔國民小學英文單字學習網</h1>
       </div>
-      <p className="sub">1200 英語單字 · 個人／訪客雙模式 · Supabase</p>
     </>
   );
 
@@ -77,7 +72,6 @@ export default function App() {
 
   // 已登入
   if (session) {
-    const user = session.user;
     if (showQuiz) {
       return (
         <main>
@@ -98,48 +92,14 @@ export default function App() {
     return (
       <main className="wrap">
         {header}
-        <div className="user">
-          <b>已登入{guestUser && "　🎮 訪客模式"}</b>
-          <div><span className="kv">Email</span>　{user.email ?? "（無）"}</div>
-          <div>
-            <span className="kv">ID</span>　<code>{user.id}</code>
-          </div>
-          <div>
-            <span className="kv">上次登入</span>　
-            {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString("zh-TW") : "—"}
-          </div>
-          <div className="row">
-            <button className="btn" onClick={() => { void signOut(); }}>
-              登出
-            </button>
-            <button className="ghost" onClick={() => setShowTest((v) => !v)}>
-              {showTest ? "隱藏連線測試" : "顯示連線測試"}
-            </button>
-          </div>
-          {!isSpeechSupported() ? (
-            <div className="kv">此瀏覽器不支援語音合成（請改用 Chrome／Edge）</div>
-          ) : (
-            <div className="row">
-              <span className="kv">
-                發音測試
-                {"　語音：" + (voiceName ?? "找不到英文語音（口音會偏中文）")}
-              </span>
-              <button className="ghost" onClick={() => speakWord("a few")}>🔊 單字</button>
-              <button className="ghost" onClick={() => speakSentence("A few teachers know her name. This is the browser's built in voice.")}>
-                🔊 例句
-              </button>
-            </div>
-          )}
-          <div className="row">
-            <button className="btn" onClick={() => setShowQuiz(true)}>
-              📝 評量活動
-            </button>
-            <button className="btn" onClick={() => setShowWords(true)}>
-              📚 單字學習（資料庫版）
-            </button>
-          </div>
+        <div className="row">
+          <button className="btn" onClick={() => setShowQuiz(true)}>
+            📝 評量活動
+          </button>
+          <button className="btn" onClick={() => setShowWords(true)}>
+            📚 單字學習（資料庫版）
+          </button>
         </div>
-        {showTest && <ConnectTest />}
       </main>
     );
   }

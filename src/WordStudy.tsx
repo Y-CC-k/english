@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "./lib/supabase";
+import { signOut } from "./lib/auth";
 import {
   speakSequence,
   stopSpeech,
@@ -173,7 +174,10 @@ export default function WordStudy({ onBack }: { onBack: () => void }) {
               <p className="ws-header-subtitle">1200 英語單字 · 教學模式 · Supabase words</p>
             </div>
           </div>
-          <button className="ws-back-btn" onClick={onBack}>← 返回</button>
+          <div className="ws-header-actions">
+            <button className="ws-logout-btn" onClick={() => void signOut()}>登出</button>
+            <button className="ws-back-btn" onClick={onBack}>← 返回</button>
+          </div>
         </div>
       </header>
 

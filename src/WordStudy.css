@@ -121,6 +121,24 @@
 
 .ws-header-subtitle { font-size: 14px; color: var(--ws-text-2); margin: 0; }
 
+.ws-header-actions { display: flex; align-items: center; gap: 10px; }
+
+.ws-logout-btn {
+    padding: 8px 18px;
+    background: rgba(239, 68, 68, 0.18);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    border-radius: 9999px;
+    color: #ff9d9d;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 150ms ease-out;
+}
+
+.ws-logout-btn:hover { background: rgba(239, 68, 68, 0.35); color: #fff; }
+
 .ws-back-btn {
     padding: 8px 18px;
     background: var(--ws-glass-bg-strong);
