@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./lib/supabase";
-import { getSession, onAuthChange } from "./lib/auth";
+import { getSession, onAuthChange, signOut } from "./lib/auth";
 import AuthForms from "./AuthForms";
 import ConnectTest from "./ConnectTest";
+import Leaderboard from "./Leaderboard";
 import WordStudy from "./WordStudy";
 import Quiz from "./Quiz";
 
@@ -17,6 +18,7 @@ export default function App() {
   const [showWords, setShowWords] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [guestLogin, setGuestLogin] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(true);
   const guestUser = session?.user.email === GUEST_EMAIL;
 
   // 訪客帳號登入成功 → 直接帶進評量頁（不用再按）
@@ -45,12 +47,21 @@ export default function App() {
   }, []);
 
   const header = (
-    <>
+    <div className="topbar">
       <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center" }}>
         <img src="/school-logo.png" alt="槺榔國小校徽" style={{ width: 56, height: 56, borderRadius: "50%", background: "#fff", padding: 3, boxShadow: "0 2px 10px rgba(0,0,0,0.2)" }} />
         <h1 style={{ margin: 0 }}>臺中市清水區槺榔國民小學英文單字學習網</h1>
       </div>
-    </>
+      {!session ? (
+        <button className="login-btn" onClick={() => setLoginOpen((v) => !v)}>
+          🔐 登入
+        </button>
+      ) : (
+        <button className="logout-btn" onClick={() => { void signOut(); }}>
+          登出
+        </button>
+      )}
+    </div>
   );
 
   if (!ready) {
@@ -100,6 +111,7 @@ export default function App() {
             📚 單字學習（資料庫版）
           </button>
         </div>
+        <Leaderboard />
       </main>
     );
   }
@@ -115,7 +127,7 @@ export default function App() {
   return (
     <main className="wrap">
       {header}
-      {guestLogin ? (
+      {loginOpen && (guestLogin ? (
         <>
           <AuthForms
             key="guest"
@@ -133,7 +145,7 @@ export default function App() {
             🎮 訪客模式（免註冊，成績以暱稱記錄）
           </button>
         </>
-      )}
+      ))}
       <button className="ghost" onClick={() => setShowWords(true)}>
         📚 單字學習（資料庫版）
       </button>

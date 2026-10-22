@@ -248,6 +248,133 @@ code {
   align-items: center;
 }
 
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.login-btn {
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 0;
+  border-radius: 9999px;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+}
+
+.login-btn:hover { background: #1d4ed8; }
+
+.logout-btn {
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid #fecaca;
+  border-radius: 9999px;
+  background: #fef2f2;
+  color: #dc2626;
+  cursor: pointer;
+}
+
+.logout-btn:hover { background: #fee2e2; }
+
+/* ---------- 首頁分數排行榜 ---------- */
+
+.lb {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  margin: 12px 0;
+}
+
+.lb-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lb-head h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.lb-selects {
+  display: flex;
+  gap: 8px;
+}
+
+.lb-selects select {
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #334155;
+  cursor: pointer;
+}
+
+.lb-selects select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lb-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.lb-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #eef2f7;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  background: #fafbfe;
+}
+
+.lb-list li.top {
+  background: #fff7e6;
+  border-color: #fde68a;
+}
+
+.lb-rank {
+  flex: none;
+  min-width: 30px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.lb-name { flex: none; }
+
+.lb-meta {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.lb-score {
+  margin-left: auto;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.lb-empty {
+  color: #64748b;
+  font-size: 13px;
+  margin: 10px 0 0;
+}
+
 /* ---------- klnes CRUD ---------- */
 
 .crud {
