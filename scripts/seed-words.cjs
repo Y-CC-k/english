@@ -1,10 +1,11 @@
 /**
  * words 單字 master 表灌入腳本（一次性管理工具）
  *
- * 來源：1200E/document/grade3~6.json
- *   - grade3/4/5：用上層版（顯示欄位最完整）
- *   - grade6    ：以「新增資料夾」版（無空白、432 字、與音檔對齊）為基底，
- *                 再疊回上層版的 word/phonetic/pos/chinese/sentence 顯示欄位
+ * 來源：1200_ENGLISH/document/grade3~6.json
+ *   - grade3/4/5：直接取用
+ *   - grade6    ：若 document/ 內只有上層版（帶空白）就直接用；
+ *                 若另存在子資料夾版（無空白、與音檔對齊），以子夾版為基底、
+ *                 疊回上層版的 word/phonetic/pos/chinese/sentence 顯示欄位
  *
  * 目的地：Supabase RPC admin_load_words（security definer，secret 驗證）
  *   - 每個年級先送 {p_mode:'clear'} 清掉該年級舊資料，再分批 upsert
@@ -35,7 +36,11 @@ if (!URL_BASE || !API_KEY || !SECRET) {
 }
 
 /* ── 載入 JSON ───────────────────────────────────────────── */
-const docDir = path.join(__dirname, "..", "1200E", "document");
+const docDir = path.join(__dirname, "..", "1200_ENGLISH", "document");
+if (!fs.existsSync(docDir)) {
+  console.error("找不到 " + docDir + "，請確認資料已放入");
+  process.exit(1);
+}
 const subDirs = fs
   .readdirSync(docDir, { withFileTypes: true })
   .filter((e) => e.isDirectory())
@@ -68,6 +73,12 @@ function loadRows(filePath, grade) {
 const displayKey = (w) => w.toLowerCase().replace(/[\s()（）]/g, "");
 
 function mergeGrade6() {
+  if (!subDirs.length) {
+    // 沒有子資料夾版 → 直接用上層版（帶空白的顯示版）
+    const rows = loadRows(path.join(docDir, "grade6.json"), 6);
+    console.log(`grade6：直接採用上層版 ${rows.length} 字（無子夾版可疊回）`);
+    return rows;
+  }
   // 基底：唯一的子資料夾版（完整、無空白）
   const baseRows = loadRows(path.join(docDir, subDirs[0], "grade6.json"), 6);
   // 疊回來源：上層版（帶空白的顯示版）

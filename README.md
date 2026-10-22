@@ -108,8 +108,7 @@ npm.cmd run typecheck # 只跑 TypeScript 檢查
 ## 6. 評量活動資料庫（words / scores / score_summary）
 
 > ✅ 已透過 Supabase MCP 建立完成（3 條 migration 記錄在案）。
-> `words` 目前是**空表** —— 1200E 資料區曾傳錯檔，已刪除重傳；等新資料就緒後
-> 用 `node scripts\seed-words.cjs` 重灌（做法見下方「單字資料來源與灌入方式」）。
+> `words` 已灌入 **grade3=288／grade4=433／grade5=432／grade6=415（共 1,568 字，各 36 週）**。
 
 | 表／視圖 | 欄位 | 權限設計 |
 | --- | --- | --- |
@@ -122,17 +121,12 @@ npm.cmd run typecheck # 只跑 TypeScript 檢查
 - `scores.user_id` 由 Postgres `default auth.uid()` 填，前端不可代送 — 防止假冒他人送分
 - 已知取捨：因為成績板要讓全班共見，任何登入者都讀得到全部紀錄；
   若日後要「老師才看得到全班」，再加一張 `profiles` 角色表擴充
-- 單字資料來源與灌入方式：
-  - grade3/4/5 取自 `1200E/document/gradeN.json`（上層版）
-  - grade6 以「重複資料夾」版（無空白、432 字、與音檔對齊）為基底，
-    疊回上層版的 `word/phonetic/pos/chinese/sentence` 顯示欄位（421 字疊回）
+- 單字資料來源與灌入方式（2026-10-22 已灌入 **1,568 字**：grade3=288／grade4=433／grade5=432／grade6=415）：
+  - 四個年級都取自 `1200_ENGLISH/document/gradeN.json`（上層版）
   - `node scripts\seed-words.cjs` 重灌：走一次性 RPC（先 clear 該年級再 upsert）；
     RPC 已於灌入後刪除，重灌前需重建（secret 讀自 `.env` 的 `SUPA_SEED_SECRET`）
-  - 音檔命名 grade3~5 含空白、grade6 去空白 → 評量頁產生 mp3 URL 時
-    要「先原字、後去空白」兩段嘗試
 - 權限行為已實測：匿名讀 words ✔／讀 scores 空 ✔／兩邊匿名寫入都被擋 ✔
-- ⚠️ 2026-10-22：1200E 資料區使用者誤傳檔案，已刪除待重傳（`words` 已清空、
-  seed 腳本保留；重灌前照下面方式重建一次性 RPC）
+- ⚠️ 2026-10-22：前一版 1200E 資料區誤傳刪除，已重傳為 `1200_ENGLISH/`（僅 JSON、無音檔）並重灌
 
 ---
 
@@ -157,24 +151,22 @@ supabase-app/
 │  └─ lib/
 │     ├─ supabase.ts     Supabase client（單例，從 import.meta.env 讀設定）
 │     └─ auth.ts         登入／註冊／登出／session 訂閱與錯誤中文化
-├─ 1200E/                1200 單字資料區（使用者自行整理中；版控暫時排除）
-│  ├─ Audio/             各年級各週的單字 mp3（Grade3～6）
+├─ 1200_ENGLISH/          1200 單字資料區（使用者自行整理；版控排除）
 │  ├─ document/          grade3~6.json 單字資料（週次 → word/phonetic/pos/chinese/sentence）
-│  └─ index.html 等      原本的單字瀏覽靜態頁
+│  └─ index.html 等      原本的單字瀏覽靜態頁（重傳版未含音檔）
 ```
 
-> **1200E 資料區備忘**（未來做評量活動時）：
-> - mp3 檔名慣例：小寫、去空白與括號內文字（例：`a few` → `afew.mp3`）
-> - `document\grade6.json` 有「上層版（帶空白、415 字）」與 `新增資料夾` 版（無空白、
->   432 字、與音檔完全對齊）兩個版本，整理時統一擇一
-> - Grade4 有 66 字、Grade5 有 30 字（`boxes(box)`、`thicker (thick)` 等變化形）
->   目前的檔名規則找不到對應 mp3，做評量時需要音檔映射表
+> **1200_ENGLISH 資料區備忘**（未來做評量活動時）：
+> - 重傳版目前**沒有 mp3**；之前版本的音檔命名慣例是小寫、
+>   去空白與括號內文字（例：`a few` → `afew.mp3`），收到音檔後需再對一次
+> - `boxes(box)`、`thicker (thick)` 等變化形（Grade4 有 66 字、Grade5 有 30 字）
+>   之後做音檔對照時需要映射表
 
 ---
 
 ## 7.1 版控與 GitHub
 
-儲存庫已初始化（主分支 `main`），`.env`、`node_modules/`、`dist/`、`1200E/` 都在
+儲存庫已初始化（主分支 `main`），`.env`、`node_modules/`、`dist/`、`1200_ENGLISH/` 都在
 `.gitignore` 排除，不會被 commit。推上 GitHub：
 
 ```powershell

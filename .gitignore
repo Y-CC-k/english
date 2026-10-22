@@ -4,13 +4,13 @@ dist/
 .env
 .env.*.local
 
-# 系統雜物
+# 系統檔案
 Thumbs.db
 Desktop.ini
 .DS_Store
 
-# 原始 zip（已解開）
+# 打包 zip
 *.zip
 
-# 1200E 資料區：使用者自行整理中，整理完成後再納入版控
-1200E/
+# 1200_ENGLISH 資料區：使用者自行整理的單字與音檔，不送進版控
+1200_ENGLISH/
