@@ -148,8 +148,9 @@ npm.cmd run typecheck # 只跑 TypeScript 檢查
   1.2 秒自動下一題
 - **收卷**：`scores` 寫入 `name／grade／week／score／detail`（逐題對錯 jsonb）；
   `user_id` 由 DB `default auth.uid()` 填，前端不可代送
-- **成績板**：`score_summary`（同級最佳／平均排名）＋最近 20 筆紀錄；
-  自己那列高亮
+- **成績板**：直接讀 `scores` 在前端聚合（2026-10-22 改版；`score_summary` view 留存）
+  — 可篩 **年級（全部／三～六）** 與 **週次**，排序可選 最佳分數／平均／考試次數／姓名；
+  「最近紀錄」列年級＋週次、最新 20 筆，自己那列高亮
 - 權限已驗證：登入者可寫自己的成績（201）／匿名讀 scores 為空 ✔
 - `scores.week` 欄位由 migration `add_week_to_scores` 加入
 - **訪客模式**：登入頁按「🎮 訪客模式」→ 預填共用帳號 `klnes@stu.klnes.tc.edu.tw`
