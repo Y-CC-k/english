@@ -38,7 +38,7 @@ interface ScoreRow {
   created_at: string;
 }
 
-const QTYPE_LABEL: Record<string, string> = { listen: "🎧 聽音", wordpick: "🔍 看義" };
+const QTYPE_LABEL: Record<string, string> = { listen: "🎧 聽音選義", wordpick: "🔍 看義選詞" };
 
 /** ISO 時間 →「10/22 14:30」樣式（含日期與時間） */
 function fmtDateTime(iso: string): string {
