@@ -192,6 +192,37 @@
 .ws-teach-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 6px 24px rgba(255, 107, 157, 0.6); }
 .ws-teach-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
+/* 無英文語音的安裝提示卡 */
+.ws-hint {
+    max-width: 560px;
+    background: var(--ws-glass-bg-strong);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--ws-glass-border-strong);
+    border-radius: 16px;
+    padding: 16px 20px;
+    text-align: left;
+    font-size: 14px;
+    color: var(--ws-text-2);
+    line-height: 1.7;
+}
+
+.ws-hint-title { color: var(--ws-text); font-weight: 600; margin: 0 0 8px; }
+.ws-hint-steps { margin: 0 0 8px; padding-left: 20px; }
+.ws-hint-steps li { margin-bottom: 6px; }
+.ws-hint-link {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 12px;
+    background: var(--ws-gradient-blue-cyan);
+    color: white;
+    border-radius: 9999px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 12px;
+}
+.ws-hint-link:hover { filter: brightness(1.1); }
+.ws-hint-foot { margin: 0; color: var(--ws-text-2); }
+
 /* 單字卡列表 */
 .ws-grid {
     max-width: 1400px;
