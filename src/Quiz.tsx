@@ -53,7 +53,7 @@ function unwrap<T>(result: { data: T[] | null; error: { message: string } | null
   return result.data ?? [];
 }
 
-export default function Quiz({ onBack }: { onBack: () => void }) {
+export default function Quiz({ onBack, guest }: { onBack: () => void; guest?: boolean }) {
   const [phase, setPhase] = useState<Phase>("setup");
   const [name, setName] = useState(() => localStorage.getItem(NAME_KEY) ?? "");
   const [grade, setGrade] = useState("");
@@ -217,11 +217,22 @@ export default function Quiz({ onBack }: { onBack: () => void }) {
           <div className="ws-header-brand">
             <div className="ws-header-logo" aria-hidden="true">Q</div>
             <div>
-              <h1 className="ws-header-title">評量活動</h1>
-              <p className="ws-header-subtitle">聽音選義／看義選詞 · 成績自動寫入 Supabase</p>
+              <h1 className="ws-header-title">評量活動{guest && "（🎮 訪客模式）"}</h1>
+              <p className="ws-header-subtitle">
+                {guest ? "成績以你輸入的暱稱記錄" : "聽音選義／看義選詞 · 成績自動寫入 Supabase"}
+              </p>
             </div>
           </div>
-          <button className="ws-back-btn" onClick={() => { stopSpeech(); onBack(); }}>← 返回</button>
+          <button
+            className="ws-back-btn"
+            onClick={() => {
+              stopSpeech();
+              if (guest) void supabase()?.auth.signOut(); // 訪客離開即登出，下一位重新登入
+              onBack();
+            }}
+          >
+            ← {guest ? "離開訪客模式" : "返回"}
+          </button>
         </div>
       </header>
 

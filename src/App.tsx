@@ -8,6 +8,9 @@ import ConnectTest from "./ConnectTest";
 import WordStudy from "./WordStudy";
 import Quiz from "./Quiz";
 
+/** 訪客模式共用帳號（Dashboard 手動建立；成績以暱稱記錄） */
+const GUEST_EMAIL = "classguest@st.tc.edu.tw";
+
 function maskKey(key: string) {
   return key.length <= 10 ? "…" : key.slice(0, 6) + "…" + key.slice(-6);
 }
@@ -19,6 +22,13 @@ export default function App() {
   const [voiceName, setVoiceName] = useState<string | null>(null);
   const [showWords, setShowWords] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
+  const [guestLogin, setGuestLogin] = useState(false);
+  const guestUser = session?.user.email === GUEST_EMAIL;
+
+  // 訪客帳號登入成功 → 直接帶進評量頁（不用再按）
+  useEffect(() => {
+    if (guestUser && !showQuiz && !showWords) setShowQuiz(true);
+  }, [guestUser, session?.user.id, showQuiz, showWords]);
   const { url, key } = loadConfig();
 
   // 啟動：先讀一次 session，之後由 onAuthStateChange 接手更新
@@ -78,7 +88,10 @@ export default function App() {
     if (showQuiz) {
       return (
         <main>
-          <Quiz onBack={() => setShowQuiz(false)} />
+          <Quiz
+            onBack={() => setShowQuiz(false)}
+            guest={guestUser}
+          />
         </main>
       );
     }
@@ -93,7 +106,7 @@ export default function App() {
       <main className="wrap">
         {header}
         <div className="user">
-          <b>已登入</b>
+          <b>已登入{guestUser && "　🎮 訪客模式"}</b>
           <div><span className="kv">Email</span>　{user.email ?? "（無）"}</div>
           <div>
             <span className="kv">ID</span>　<code>{user.id}</code>
@@ -149,7 +162,24 @@ export default function App() {
   return (
     <main className="wrap">
       {header}
-      <AuthForms />
+      {guestLogin ? (
+        <>
+          <AuthForms
+            initialEmail={GUEST_EMAIL}
+            guestHint="訪客模式：輸入訪客帳號密碼登入（Email 已填好），成績會以你輸入的暱稱記錄。"
+          />
+          <button className="ghost" onClick={() => setGuestLogin(false)}>
+            ← 改用個人帳號
+          </button>
+        </>
+      ) : (
+        <>
+          <AuthForms />
+          <button className="ghost" onClick={() => setGuestLogin(true)}>
+            🎮 訪客模式（免註冊，成績以暱稱記錄）
+          </button>
+        </>
+      )}
       <button className="ghost" onClick={() => setShowWords(true)}>
         📚 單字學習（資料庫版）
       </button>

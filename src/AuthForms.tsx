@@ -4,10 +4,10 @@ import { friendlyAuthError, sendResetMail, signIn, signUp } from "./lib/auth";
 type Mode = "login" | "register";
 type Info = { kind: "ok" | "warn" | "err"; text: string };
 
-/** 登入／註冊表單（同一個元件，上方切頁籤）。 */
-export default function AuthForms() {
+/** 登入／註冊表單（同一個元件，上方切頁籤）；initialEmail 可預填（訪客模式用）。 */
+export default function AuthForms({ initialEmail, guestHint }: { initialEmail?: string; guestHint?: string }) {
   const [mode, setMode] = useState<Mode>("login");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail ?? "");
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [busy, setBusy] = useState(false);
@@ -89,6 +89,8 @@ export default function AuthForms() {
           註冊
         </button>
       </div>
+
+      {guestHint && <p className="notice">🎮 {guestHint}</p>}
 
       {mode === "register" && (
         <p className="notice">

@@ -152,6 +152,11 @@ npm.cmd run typecheck # 只跑 TypeScript 檢查
   自己那列高亮
 - 權限已驗證：登入者可寫自己的成績（201）／匿名讀 scores 為空 ✔
 - `scores.week` 欄位由 migration `add_week_to_scores` 加入
+- **訪客模式**：登入頁按「🎮 訪客模式」→ 預填共用帳號 `classguest@st.tc.edu.tw`
+  （Dashboard → Authentication → Users 手動建立＋Auto Confirm）→ 登入直接進評量頁，
+  成績以學生輸入的**暱稱**記錄（`user_id` 由 DB 填，仍防偽）；「離開訪客模式」自動登出。
+  已知取捨：共用帳號的所有紀錄同一 `user_id`，持有訪客密碼者可用 API 刪除這些
+  訪客紀錄（教室情境可接受；密碼可在 Dashboard 隨時改）。
 - ⚠️ 2026-10-22：前一版 1200E 資料區誤傳刪除，已重傳為 `1200_ENGLISH/`（僅 JSON、無音檔）並重灌
 
 ---
