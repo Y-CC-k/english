@@ -1,0 +1,86 @@
+html
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>單字副本挑戰</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #1e1e1e; color: #fff; }
+        .status-board { display: flex; justify-content: space-around; margin-bottom: 30px; font-size: 20px; }
+        .hp { color: #ff4757; font-weight: bold; }
+        #question { font-size: 32px; margin: 20px; color: #ffa502; }
+        input { font-size: 20px; padding: 10px; width: 200px; text-align: center; }
+        button { font-size: 20px; padding: 10px 20px; margin-left: 10px; cursor: pointer; }
+        #log { margin-top: 30px; color: #2ed573; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <h1>🏰 副本關卡：史萊姆森林</h1>
+    
+    <div class="status-board">
+        <div>🧙‍♂️ 玩家 HP: <span id="player-hp" class="hp">100</span></div>
+        <div>👾 怪獸 HP: <span id="monster-hp" class="hp">50</span></div>
+    </div>
+
+    <div id="game-container">
+        <p>請輸入以下單字的英文：</p>
+        <div id="question">提示：蘋果</div>
+        <input type="text" id="answer-input" placeholder="輸入英文..." autocomplete="off">
+        <button onclick="checkAnswer()">攻擊！</button>
+        <div id="log">準備戰鬥...</div>
+    </div>
+
+    <script>
+        // 1. 初始化資料
+        let playerHp = 100;
+        let monsterHp = 50;
+        
+        // 模擬單字庫庫
+        const wordPool = [
+            { ch: "蘋果", en: "apple" },
+            { ch: "香蕉", en: "banana" },
+            { ch: "貓咪", en: "cat" },
+            { ch: "狗狗", en: "dog" }
+        ];
+        let currentIdx = 0;
+
+        // 2. 檢查答案的核心邏輯
+        function checkAnswer() {
+            const inputField = document.getElementById("answer-input");
+            const userAnswer = inputField.value.trim().toLowerCase();
+            const correctAnswer = wordPool[currentIdx].en;
+            const logDiv = document.getElementById("log");
+
+            if (userAnswer === correctAnswer) {
+                // 答對：對怪獸造成傷害
+                monsterHp -= 25;
+                logDiv.innerHTML = `⚔️ 答對了！你對怪獸造成 25 點傷害！`;
+            } else {
+                // 答錯：怪獸反擊
+                playerHp -= 20;
+                logDiv.innerHTML = `💥 答錯了！正確答案是 ${correctAnswer}。怪獸反擊，你受到 20 點傷害！`;
+            }
+
+            // 更新畫面血條
+            document.getElementById("player-hp").innerText = playerHp;
+            document.getElementById("monster-hp").innerText = monsterHp;
+            inputField.value = ""; // 清空輸入框
+
+            // 3. 檢查勝負狀態
+            if (monsterHp <= 0) {
+                document.getElementById("game-container").innerHTML = "🎉 <h2>你成功擊敗了怪獸，通關副本！</h2>";
+                return;
+            }
+            if (playerHp <= 0) {
+                document.getElementById("game-container").innerHTML = "💀 <h2>你被怪獸擊敗了... 請再接再厲！</h2>";
+                return;
+            }
+
+            // 4. 輪向下一題
+            currentIdx = (currentIdx + 1) % wordPool.length;
+            document.getElementById("question").innerText = `提示：${wordPool[currentIdx].ch}`;
+        }
+    </script>
+</body>
+</html>
