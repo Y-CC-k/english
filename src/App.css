@@ -14,9 +14,9 @@ body {
 }
 
 .wrap {
-  max-width: 640px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding: 20px 20px 48px;
 }
 
 h1 {

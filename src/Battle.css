@@ -1,6 +1,7 @@
 .battle-container {
-  display: flex; flex-direction: column; height: 90vh;
-  max-width: 480px; margin: 0 auto; background: #1a1a2e; color: white;
+  display: flex; flex-direction: column;
+  min-height: calc(100vh - 170px);
+  max-width: 100%; margin: 0 auto; background: #1a1a2e; color: white;
   border-radius: 12px; overflow: hidden; position: relative;
   font-family: sans-serif;
 }

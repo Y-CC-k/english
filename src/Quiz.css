@@ -3,7 +3,7 @@
    ============================================ */
 
 .qz-panel {
-    max-width: 720px;
+    max-width: 100%;
     margin: 24px auto;
     padding: 28px 32px;
     background: var(--ws-glass-bg);
@@ -18,7 +18,7 @@
     z-index: 1;
 }
 
-.qz-panel-wide { max-width: 900px; }
+.qz-panel-wide { max-width: 100%; }
 
 .qz-title { font-size: 20px; font-weight: 700; margin: 0; }
 
