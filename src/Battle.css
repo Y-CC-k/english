@@ -8,7 +8,17 @@
 .hp-bar { width: 100%; height: 10px; background: #333; border-radius: 5px; margin-top: 5px; }
 .hp-fill { height: 100%; transition: width 0.3s ease; background: #ff4757; }
 .stage { height: 45%; display: flex; align-items: center; justify-content: center; position: relative; }
-.monster { font-size: 80px; animation: float 3s infinite ease-in-out; }
+.monster {
+  position: absolute; transform: translate(-50%, -50%);
+  font-size: 72px; cursor: crosshair;
+  transition: left 1.1s cubic-bezier(.45,.05,.55,.95), top 1.1s cubic-bezier(.45,.05,.55,.95), filter .25s;
+  animation: float 3s infinite ease-in-out;
+}
+/* 答對受擊 → 變色 + 放大抖一下 */
+.monster.mon-hit { filter: hue-rotate(130deg) saturate(2.2) brightness(1.4); animation: hitPop .45s ease; }
+@keyframes hitPop {
+  0% { scale: 1; } 35% { scale: 1.22; } 60% { scale: .95; } 100% { scale: 1; }
+}
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
 .damage-text { position: absolute; top: 20%; color: #ffd700; font-weight: bold; font-size: 32px; animation: floatUp 0.8s forwards; pointer-events: none; }
 @keyframes floatUp { to { transform: translateY(-50px); opacity: 0; } }

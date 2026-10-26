@@ -13,6 +13,19 @@ export default function Battle({ grade, week, onBack }: { grade: number, week: n
   const [lastTime, setLastTime] = useState(Date.now());
   const [shake, setShake] = useState(false);
   const [dmg, setDmg] = useState<{val: number} | null>(null);
+  // 怪物位置（隨機漫步）與受擊變色
+  const [monPos, setMonPos] = useState({ x: 50, y: 50 });
+  const [monHit, setMonHit] = useState(false);
+
+  // 戰鬥中怪物到處跑（每 1.3 秒換一個隨機位置）
+  useEffect(() => {
+    if (phase !== 'battle') return;
+    setMonPos({ x: 50, y: 45 });
+    const t = setInterval(() => {
+      setMonPos({ x: 15 + Math.random() * 70, y: 10 + Math.random() * 55 });
+    }, 1300);
+    return () => clearInterval(t);
+  }, [phase, curr]);
 
   useEffect(() => {
     async function init() {
@@ -65,6 +78,9 @@ export default function Battle({ grade, week, onBack }: { grade: number, week: n
       });
       setDmg({ val: damage });
       setTimeout(() => setDmg(null), 800);
+      // 答對 → 怪物變色閃一下
+      setMonHit(true);
+      setTimeout(() => setMonHit(false), 450);
     } else {
       setCombo(0);
       setShake(true);
@@ -92,7 +108,9 @@ export default function Battle({ grade, week, onBack }: { grade: number, week: n
             <div>玩家: ({pHP}HP) | 連擊: {combo}</div>
           </div>
           <div className="stage">
-            <div className="monster">{monster?.image_url || '👾'}</div>
+            <div className={`monster ${monHit ? "mon-hit" : ""}`} style={{ left: `${monPos.x}%`, top: `${monPos.y}%` }}>
+              {monster?.image_url || '👾'}
+            </div>
             {dmg && <div className="damage-text">-{dmg.val}</div>}
           </div>
           <div className="actions">
