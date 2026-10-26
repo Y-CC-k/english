@@ -299,6 +299,48 @@ code {
 
 .logout-btn:hover { background: #fee2e2; }
 
+/* ---------- 頂部功能選單（與登出鍵同款膠囊風） ---------- */
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nav-menu > button:not(.logout-btn) {
+  padding: 9px 18px;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1.5px solid transparent;
+  border-radius: 9999px;
+  background: #fff;
+  color: #475569;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s, color 0.15s;
+}
+
+.nav-menu > button:not(.logout-btn):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+/* 各功能專屬底色 */
+.nav-menu > button:nth-child(1) { color: #0d9488; border-color: #99f6e4; background: #f0fdfa; }  /* 📖 單字 Teal */
+.nav-menu > button:nth-child(2) { color: #7c3aed; border-color: #ddd6fe; background: #f5f3ff; }  /* 🎮 評量 Violet */
+.nav-menu > button:nth-child(3) { color: #b45309; border-color: #fde68a; background: #fffbeb; }  /* 📊 成績 Amber */
+.nav-menu > button:nth-child(4) { color: #dc2626; border-color: #fecaca; background: #fef2f2; }  /* ⚔️ 副本 Red */
+
+/* 目前所在的頁面 → 填色發亮 */
+.nav-menu > button.active:nth-child(1) { background: #14b8a6; border-color: #14b8a6; color: #fff; }
+.nav-menu > button.active:nth-child(2) { background: #8b5cf6; border-color: #8b5cf6; color: #fff; }
+.nav-menu > button.active:nth-child(3) { background: #f59e0b; border-color: #f59e0b; color: #fff; }
+.nav-menu > button.active:nth-child(4) { background: #ef4444; border-color: #ef4444; color: #fff; }
+
+.nav-menu > button:active { transform: translateY(0) scale(0.97); }
+
 /* ---------- 首頁 Hero（兒童風：吉祥物＋大按鈕＋粉彩） ---------- */
 
 .hero {
