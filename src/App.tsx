@@ -58,12 +58,14 @@ export default function App() {
   // 切換頁面視圖
   const renderView = () => {
     if (battleParams) return (
-      <Battle 
-        grade={battleParams.grade} 
-        week={battleParams.week} 
-        onBack={() => setBattleParams(null)} 
+      <Battle
+        key={`${battleParams.grade}-${battleParams.week}`}
+        grade={battleParams.grade}
+        week={battleParams.week}
+        onBack={() => { setBattleParams(null); setView('board'); }}
       />
     );
+    if (view === 'battle') return <Battle onBack={() => setView('study')} />;
     switch (view) {
       case 'study': return <WordStudy onBack={() => setView('quiz')} />;
       case 'quiz': return (
@@ -73,7 +75,6 @@ export default function App() {
           accountName={guestUser ? undefined : (session?.user.email ?? undefined)}
           teacher={!guestUser && role === 1}
           initialBoard={false}
-          onStartBattle={(g, w) => setBattleParams({ grade: g, week: w })}
         />
       );
       case 'board': return (
@@ -83,7 +84,6 @@ export default function App() {
           accountName={guestUser ? undefined : (session?.user.email ?? undefined)}
           teacher={!guestUser && role === 1}
           initialBoard={true}
-          onStartBattle={(g, w) => setBattleParams({ grade: g, week: w })}
         />
       );
       default: return <WordStudy onBack={() => setView('quiz')} />;
@@ -99,7 +99,8 @@ export default function App() {
       <nav className="nav-menu">
         <button className={view === 'study' ? 'active' : ''} onClick={() => setView('study')}>📖 單字學習</button>
         <button className={view === 'quiz' ? 'active' : ''} onClick={() => setView('quiz')}>🎮 評量活動</button>
-        <button className={view === 'board' ? 'active' : ''} onClick={() => setView('board')}>📊 成績板</button>
+        <button className={view === 'board' ? 'active' : ''} onClick={() => { setBattleParams(null); setView('board'); }}>📊 成績板</button>
+        <button className={view === 'battle' ? 'active' : ''} onClick={() => { setBattleParams(null); setView('battle'); }}>⚔️ 挑戰副本</button>
         <button className="logout-btn" onClick={() => void signOut()}>登出</button>
       </nav>
     </div>

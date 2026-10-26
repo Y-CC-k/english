@@ -2,11 +2,15 @@ import { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import './Battle.css';
 
-export default function Battle({ grade, week, onBack }: { grade: number, week: number, onBack: () => void }) {
+export default function Battle({ grade: initGrade, week: initWeek, onBack }: { grade?: number; week?: number; onBack: () => void }) {
   const [monster, setMonster] = useState<any>(null);
   const [mHP, setMHP] = useState(0);
   const [pHP, setPHP] = useState(100);
-  const [phase, setPhase] = useState<'loading' | 'battle' | 'victory' | 'defeat'>('loading');
+  const [grade, setGrade] = useState<number | null>(initGrade ?? null);
+  const [week, setWeek] = useState<number | null>(initWeek ?? null);
+  const [phase, setPhase] = useState<'setup' | 'loading' | 'battle' | 'victory' | 'defeat'>(
+    initGrade && initWeek ? 'loading' : 'setup'
+  );
   const [questions, setQuestions] = useState<any[]>([]);
   const [curr, setCurr] = useState(0);
   const [combo, setCombo] = useState(0);
@@ -28,20 +32,19 @@ export default function Battle({ grade, week, onBack }: { grade: number, week: n
   }, [phase, curr]);
 
   useEffect(() => {
+    if (!grade || !week) return;
     async function init() {
       const sb = supabase();
       if (!sb) return;
-      
-      console.log("正在載入副本:", { grade, week });
+
       const { data: mData } = await sb.from('monsters').select('*').limit(1).single();
       const { data: wData } = await sb
         .from('words')
         .select('*')
-        .eq('grade', grade)
-        .eq('week', week)
+        .eq('grade', grade!)
+        .eq('week', week!)
         .limit(10);
-        
-      console.log("副本資料:", { mData, wData });
+
       if (mData) { setMonster(mData); setMHP(mData.max_hp); }
       if (wData && wData.length > 0) {
         // 自動生成選項（一個正確 + 三個隨機錯誤）
@@ -56,6 +59,35 @@ export default function Battle({ grade, week, onBack }: { grade: number, week: n
     }
     init();
   }, [grade, week]);
+
+  // 選關頁：先挑年級／週次再開戰
+  if (phase === 'setup') {
+    return (
+      <div className="battle-container battle-setup">
+        <h2>⚔️ 挑戰副本</h2>
+        <p className="setup-hint">選好年級與週次，點開戰去討伐史萊姆單字怪！</p>
+        <div className="setup-row">
+          <select value={grade ?? ""} onChange={(e) => setGrade(Number(e.target.value) || null)}>
+            <option value="">選年級</option>
+            <option value="3">三年級</option>
+            <option value="4">四年級</option>
+            <option value="5">五年級</option>
+            <option value="6">六年級</option>
+          </select>
+          <select value={week ?? ""} onChange={(e) => setWeek(Number(e.target.value) || null)}>
+            <option value="">選週次</option>
+            {Array.from({ length: 36 }, (_, i) => i + 1).map((n) => (
+              <option key={n} value={n}>第 {n} 週</option>
+            ))}
+          </select>
+        </div>
+        <button className="btn-act setup-start" disabled={!grade || !week} onClick={() => setPhase('loading')}>
+          🗡️ 開戰
+        </button>
+        <button className="btn-act setup-back" onClick={onBack}>← 返回</button>
+      </div>
+    );
+  }
 
   const handleAnswer = (isCorrect: boolean) => {
     if (phase !== 'battle') return;
@@ -97,7 +129,16 @@ export default function Battle({ grade, week, onBack }: { grade: number, week: n
   };
 
   if (phase === 'loading') return <div className="battle-container">載入副本中...</div>;
-  const q = questions[curr] || { word: "無單字", options: [] };
+  if (phase === 'battle' && questions.length === 0) {
+    return (
+      <div className="battle-container battle-setup">
+        <h2>🌫️ 這個週次沒有單字</h2>
+        <p className="setup-hint">換一個年級或週次再挑戰吧！</p>
+        <button className="btn-act setup-back" onClick={onBack}>← 返回</button>
+      </div>
+    );
+  }
+  const q = questions[curr];
 
   return (
     <div className={`battle-container ${shake ? 'shake' : ''}`}>

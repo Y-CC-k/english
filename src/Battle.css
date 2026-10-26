@@ -27,3 +27,14 @@
 .actions { height: 40%; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: #16213e; }
 .btn-act { padding: 15px; background: #e94560; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; }
 .result-screen { position: absolute; top:0; left:0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; }
+/* 選關頁 */
+.battle-setup { justify-content: center; align-items: center; gap: 16px; text-align: center; }
+.setup-hint { color: #a8b2d1; font-size: 15px; }
+.setup-row { display: flex; gap: 10px; }
+.setup-row select {
+  font-size: 17px; padding: 10px 14px; border-radius: 10px; border: 2px solid #e94560;
+  background: #16213e; color: white; min-height: 44px;
+}
+.setup-start { background: #e94560; font-size: 19px; padding: 13px 40px; border-radius: 12px; }
+.setup-start:disabled { opacity: .45; cursor: not-allowed; }
+.setup-back { background: #3a4a6b; font-size: 16px; border-radius: 12px; }
