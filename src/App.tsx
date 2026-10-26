@@ -67,10 +67,11 @@ export default function App() {
     );
     if (view === 'battle') return <Battle onBack={() => setView('study')} />;
     switch (view) {
-      case 'study': return <WordStudy onBack={() => setView('quiz')} />;
+      case 'study': return <WordStudy key="study" onBack={() => setView('quiz')} />;
       case 'quiz': return (
-        <Quiz 
-          onBack={() => setView('quiz')} 
+        <Quiz
+          key="quiz"
+          onBack={() => setView('quiz')}
           guest={guestUser} 
           accountName={guestUser ? undefined : (session?.user.email ?? undefined)}
           teacher={!guestUser && role === 1}
@@ -78,15 +79,16 @@ export default function App() {
         />
       );
       case 'board': return (
-        <Quiz 
-          onBack={() => setView('board')} 
+        <Quiz
+          key="board"
+          onBack={() => setView('board')}
           guest={guestUser} 
           accountName={guestUser ? undefined : (session?.user.email ?? undefined)}
           teacher={!guestUser && role === 1}
           initialBoard={true}
         />
       );
-      default: return <WordStudy onBack={() => setView('quiz')} />;
+      default: return <WordStudy key="study" onBack={() => setView('quiz')} />;
     }
   };
 
