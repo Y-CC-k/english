@@ -152,15 +152,17 @@ export default function Battle({ grade: initGrade, week: initWeek, onBack }: { g
             <div className={`monster ${monHit ? "mon-hit" : ""}`} style={{ left: `${monPos.x}%`, top: `${monPos.y}%` }}>
               {monster?.image_url || '👾'}
             </div>
-            {dmg && <div className="damage-text">-{dmg.val}</div>}
+            {dmg && <div className="damage-text" style={{ left: `${monPos.x}%`, top: `${monPos.y}%` }}>-{dmg.val}</div>}
           </div>
           <div className="actions">
             <h3>{q.word}</h3>
-            {q.options?.map((opt: string) => (
-              <button key={opt} className="btn-act" onClick={() => handleAnswer(opt === q.correct)}>
-                {opt}
-              </button>
-            ))}
+            <div className="qz-opt-grid">
+              {q.options.map((opt: string) => (
+                <button key={opt} className="btn-act" onClick={() => handleAnswer(opt === q.correct)}>
+                  {opt}
+                </button>
+              ))}
+            </div>
           </div>
         </>
       ) : (
