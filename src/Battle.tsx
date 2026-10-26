@@ -18,6 +18,8 @@ export default function Battle({ grade, week, onBack }: { grade: number, week: n
     async function init() {
       const sb = supabase();
       if (!sb) return;
+      
+      console.log("正在載入副本:", { grade, week });
       const { data: mData } = await sb.from('monsters').select('*').limit(1).single();
       const { data: wData } = await sb
         .from('words')
@@ -26,8 +28,17 @@ export default function Battle({ grade, week, onBack }: { grade: number, week: n
         .eq('week', week)
         .limit(10);
         
+      console.log("副本資料:", { mData, wData });
       if (mData) { setMonster(mData); setMHP(mData.max_hp); }
-      if (wData && wData.length > 0) setQuestions(wData);
+      if (wData && wData.length > 0) {
+        // 自動生成選項（一個正確 + 三個隨機錯誤）
+        const processed = wData.map(q => ({
+          ...q,
+          correct: q.chinese,
+          options: [q.chinese, ...wData.filter(x => x.chinese !== q.chinese).slice(0, 3).map(x => x.chinese)].sort(() => Math.random() - 0.5)
+        }));
+        setQuestions(processed);
+      }
       setPhase('battle');
     }
     init();

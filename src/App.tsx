@@ -17,17 +17,13 @@ export default function App() {
   // 全域頁面狀態：study(單字), quiz(評量), board(成績), battle(副本)
   const [view, setView] = useState<'study' | 'quiz' | 'board' | 'battle'>('study');
   const [ready, setReady] = useState(false);
-  const [showWords, setShowWords] = useState(false);
-  const [showQuiz, setShowQuiz] = useState(false);
-  const [quizBoard, setQuizBoard] = useState(false); // true = 直接開成績板（跳過準備頁）
   const [loginOpen, setLoginOpen] = useState(false);
-  const [role, setRole] = useState<number | null>(null); // profiles.role：0=學生 1=老師
+  const [role, setRole] = useState<number>(0); // profiles.role：0=學生 1=老師
   const guestUser = session?.user.email === GUEST_EMAIL;
 
-  // 訪客帳號登入成功 → 直接帶進評量頁（不用再按）
   useEffect(() => {
-    if (guestUser && !showQuiz && !showWords) setShowQuiz(true);
-  }, [guestUser, session?.user.id, showQuiz, showWords]);
+    if (guestUser) setView('quiz');
+  }, [guestUser]);
 
   // 啟動：先讀一次 session
   useEffect(() => {
@@ -69,12 +65,12 @@ export default function App() {
       />
     );
     switch (view) {
-      case 'study': return <WordStudy />;
+      case 'study': return <WordStudy onBack={() => setView('quiz')} />;
       case 'quiz': return (
         <Quiz 
           onBack={() => setView('quiz')} 
           guest={guestUser} 
-          accountName={guestUser ? undefined : (session.user.email ?? undefined)}
+          accountName={guestUser ? undefined : (session?.user.email ?? undefined)}
           teacher={!guestUser && role === 1}
           initialBoard={false}
           onStartBattle={(g, w) => setBattleParams({ grade: g, week: w })}
@@ -84,13 +80,13 @@ export default function App() {
         <Quiz 
           onBack={() => setView('board')} 
           guest={guestUser} 
-          accountName={guestUser ? undefined : (session.user.email ?? undefined)}
+          accountName={guestUser ? undefined : (session?.user.email ?? undefined)}
           teacher={!guestUser && role === 1}
           initialBoard={true}
           onStartBattle={(g, w) => setBattleParams({ grade: g, week: w })}
         />
       );
-      default: return <WordStudy />;
+      default: return <WordStudy onBack={() => setView('quiz')} />;
     }
   };
 
@@ -135,63 +131,10 @@ export default function App() {
 
   // 已登入
   if (session) {
-    if (battleParams) {
-      return (
-        <main>
-          <Battle 
-            grade={battleParams.grade} 
-            week={battleParams.week} 
-            onBack={() => setBattleParams(null)} 
-          />
-        </main>
-      );
-    }
-    if (showQuiz) {
-      return (
-        <main>
-          <Quiz
-            onBack={() => { setShowQuiz(false); setQuizBoard(false); }}
-            guest={guestUser}
-            accountName={guestUser ? undefined : (session.user.email ?? undefined)}
-            teacher={!guestUser && role === 1}
-            initialBoard={quizBoard}
-            onStartBattle={(g, w) => setBattleParams({ grade: g, week: w })}
-          />
-        </main>
-      );
-    }
-    if (showWords) {
-      return (
-        <main>
-          <WordStudy onBack={() => setShowWords(false)} />
-        </main>
-      );
-    }
     return (
       <main className="wrap">
         {header}
-        <section className="hero">
-          <div className="hero-mascot">
-            <img src="school-logo.png" alt="" aria-hidden="true" />
-            <span className="hero-sparkle" aria-hidden="true">✨</span>
-          </div>
-          <p className="hero-tagline">一起聽、一起玩，把 1200 個英文單字通通學會！</p>
-          <button className="hero-cta" onClick={() => { setQuizBoard(false); setShowQuiz(true); }}>
-            🚀 開始學習
-          </button>
-        </section>
-        <div className="row">
-          <button className="btn" onClick={() => { setQuizBoard(false); setShowQuiz(true); }}>
-            📝 評量活動
-          </button>
-          <button className="btn" onClick={() => { setQuizBoard(true); setShowQuiz(true); }}>
-            📊 成績板
-          </button>
-          <button className="btn" onClick={() => setShowWords(true)}>
-            📚 單字學習（資料庫版）
-          </button>
-        </div>
-        <Leaderboard />
+        {renderView()}
       </main>
     );
   }
