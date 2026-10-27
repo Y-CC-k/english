@@ -90,7 +90,7 @@ export default function Leaderboard() {
               <b className="lb-name">{r.name}</b>
               <span className="lb-meta">{r.grade} 年級 · 第 {r.week} 週</span>
               {r.qtype && <span className="lb-qtype">{r.qtype === "listen" ? "🎧 聽音選義" : "🔍 看義選詞"}</span>}
-              <span className="lb-score">{r.total ? `${r.score}/${r.total}` : `${r.score} 分`}</span>
+              <span className="lb-score">{`${r.score}/${r.total ?? 10}`}</span>
             </li>
           ))}
         </ol>

@@ -624,7 +624,7 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
                     <td className="num">{r.grade}</td>
                     <td className="num">第 {r.week} 週</td>
                     <td>{r.qtype ? QTYPE_LABEL[r.qtype] ?? r.qtype : "—"}</td>
-                    <td className="num">{r.total ? `${r.score} / ${r.total}` : r.score}</td>
+                    <td className="num">{`${r.score} / ${r.total ?? 10}`}</td>
                   </tr>
                 ))}
                 {recent.length === 0 && !loading && (
@@ -650,7 +650,7 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
                         <td className="num">{r.grade}</td>
                         <td className="num">第 {r.week} 週</td>
                         <td>{r.qtype ? QTYPE_LABEL[r.qtype] ?? r.qtype : "—"}</td>
-                        <td className="num">{r.total ? `${r.score} / ${r.total}` : r.score}</td>
+                        <td className="num">{`${r.score} / ${r.total ?? 10}`}</td>
                         <td className="num">{r.ip ?? "—"}</td>
                         <td>
                           <button
