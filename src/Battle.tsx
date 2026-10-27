@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from './lib/supabase';
 import './Battle.css';
 
@@ -20,16 +20,43 @@ export default function Battle({ grade: initGrade, week: initWeek, onBack }: { g
   // 怪物位置（隨機漫步）與受擊變色
   const [monPos, setMonPos] = useState({ x: 50, y: 50 });
   const [monHit, setMonHit] = useState(false);
+  const monPosRef = useRef({ x: 50, y: 45 });
+  // 🤖 機器人：答對後走出來砍怪的表演
+  const [heroState, setHeroState] = useState<"hidden" | "walk" | "attack" | "back">("hidden");
+  const [heroPos, setHeroPos] = useState({ x: -10, y: 60 });
+  const heroSeqRef = useRef(0);
 
   // 戰鬥中怪物到處跑（每 1.3 秒換一個隨機位置）
   useEffect(() => {
     if (phase !== 'battle') return;
     setMonPos({ x: 50, y: 45 });
+    monPosRef.current = { x: 50, y: 45 };
     const t = setInterval(() => {
-      setMonPos({ x: 15 + Math.random() * 70, y: 10 + Math.random() * 55 });
+      const p = { x: 15 + Math.random() * 70, y: 10 + Math.random() * 55 };
+      monPosRef.current = p;
+      setMonPos(p);
     }, 1300);
     return () => clearInterval(t);
   }, [phase, curr]);
+
+  /** 答對演出：機器人走入戰場 → 衝到怪物旁 → 揮擊（命中＝變色＋傷害飄字）→ 退場 */
+  function robotAttack(damage: number) {
+    const seq = ++heroSeqRef.current;               // 新演出開始 → 舊演出計時全部作廢
+    const at = (ms: number, fn: () => void) =>
+      window.setTimeout(() => { if (heroSeqRef.current === seq) fn(); }, ms);
+    const ty = monPosRef.current.y + 3;
+    const tx = Math.max(monPosRef.current.x - 8, 8);
+    at(0, () => { setHeroState("walk"); setHeroPos({ x: -8, y: ty }); });
+    at(60, () => setHeroPos({ x: tx, y: ty }));     // 衝過去（CSS transition 走路）
+    at(900, () => setHeroState("attack"));          // 揮劍！
+    at(1150, () => {                                // 命中：怪物變色＋傷害飄字
+      setMonHit(true);
+      setDmg({ val: damage });
+    });
+    at(1600, () => { setMonHit(false); setHeroState("back"); setHeroPos({ x: -15, y: ty }); });
+    at(2000, () => setDmg(null));
+    at(2600, () => setHeroState("hidden"));
+  }
 
   useEffect(() => {
     if (!grade || !week) return;
@@ -108,11 +135,8 @@ export default function Battle({ grade: initGrade, week: initWeek, onBack }: { g
         if (next === 0) setPhase('victory');
         return next;
       });
-      setDmg({ val: damage });
-      setTimeout(() => setDmg(null), 800);
-      // 答對 → 怪物變色閃一下
-      setMonHit(true);
-      setTimeout(() => setMonHit(false), 450);
+      // 🤖 機器人出擊演出的時候順便讓怪物變色割血
+      robotAttack(damage);
     } else {
       setCombo(0);
       setShake(true);
@@ -152,6 +176,11 @@ export default function Battle({ grade: initGrade, week: initWeek, onBack }: { g
             <div className={`monster ${monHit ? "mon-hit" : ""}`} style={{ left: `${monPos.x}%`, top: `${monPos.y}%` }}>
               {monster?.image_url || '👾'}
             </div>
+            {heroState !== "hidden" && (
+              <div className={`hero-bot ${heroState}`} style={{ left: `${heroPos.x}%`, top: `${heroPos.y}%` }}>
+                <span>🤖</span>
+              </div>
+            )}
             {dmg && <div className="damage-text" style={{ left: `${monPos.x}%`, top: `${monPos.y}%` }}>-{dmg.val}</div>}
           </div>
           <div className="actions">

@@ -38,9 +38,30 @@
   position: absolute; transform: translate(-50%, -50%);
   color: #ffd700; font-weight: bold; font-size: clamp(24px, 5vw, 34px);
   text-shadow: 0 2px 8px rgba(0,0,0,.55);
-  animation: floatUp .8s forwards; pointer-events: none; z-index: 3;
+  animation: floatUp .8s forwards; pointer-events: none; z-index: 4;
 }
 @keyframes floatUp { to { transform: translate(-50%, calc(-50% - 56px)); opacity: 0; } }
+
+/* 🤖 機器人：走路（左右滑移交給 transition）＋小跳步 */
+.hero-bot {
+  position: absolute; transform: translate(-50%, -50%);
+  font-size: clamp(40px, 7.5vw, 76px); z-index: 2; pointer-events: none;
+  transition: left .85s cubic-bezier(.4,.05,.6,1), top .85s cubic-bezier(.4,.05,.6,1);
+}
+.hero-bot.walk, .hero-bot.back { animation: step .38s ease-in-out infinite; }
+@keyframes step { 0%,100% { margin-top: 0; } 50% { margin-top: -7px; } }
+
+/* 揮劍：手臂由上往下劈 */
+.hero-bot.attack > span {
+  display: inline-block; transform-origin: 78% 88%;
+  animation: slash .42s ease;
+}
+@keyframes slash {
+  0%   { transform: rotate(-34deg); }
+  42%  { transform: rotate(16deg) translateX(10%); }
+  62%  { transform: rotate(6deg); }
+  100% { transform: rotate(0deg); }
+}
 
 .shake { animation: shake .3s; }
 @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
