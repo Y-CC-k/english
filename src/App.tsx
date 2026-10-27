@@ -7,6 +7,7 @@ import Leaderboard from "./Leaderboard";
 import WordStudy from "./WordStudy";
 import Quiz from "./Quiz";
 import Battle from "./Battle";
+import CardBattle from "./CardBattle";
 
 /** 訪客模式共用帳號（Dashboard 手動建立；成績以暱稱記錄；密碼由使用者登入時輸入） */
 const GUEST_EMAIL = "klnes@stu.klnes.tc.edu.tw";
@@ -15,7 +16,7 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [battleParams, setBattleParams] = useState<{ grade: number, week: number } | null>(null);
   // 全域頁面狀態：study(單字), quiz(評量), board(成績), battle(副本)
-  const [view, setView] = useState<'study' | 'quiz' | 'board' | 'battle'>('study');
+  const [view, setView] = useState<'study' | 'quiz' | 'board' | 'battle' | 'cardbattle'>('study');
   const [ready, setReady] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [role, setRole] = useState<number>(0); // profiles.role：0=學生 1=老師
@@ -66,6 +67,7 @@ export default function App() {
       />
     );
     if (view === 'battle') return <Battle onBack={() => setView('study')} />;
+    if (view === 'cardbattle') return <CardBattle onBack={() => setView('study')} />;
     switch (view) {
       case 'study': return <WordStudy key="study" />;
       case 'quiz': return (
@@ -103,6 +105,7 @@ export default function App() {
         <button className={view === 'quiz' ? 'active' : ''} onClick={() => setView('quiz')}>🎮 評量活動</button>
         <button className={view === 'board' ? 'active' : ''} onClick={() => { setBattleParams(null); setView('board'); }}>📊 成績板</button>
         <button className={view === 'battle' ? 'active' : ''} onClick={() => { setBattleParams(null); setView('battle'); }}>⚔️ 挑戰副本</button>
+        <button className={view === 'cardbattle' ? 'active' : ''} onClick={() => { setBattleParams(null); setView('cardbattle'); }}>🃏 卡牌對戰</button>
         <button className="logout-btn" onClick={() => void signOut()}>登出</button>
       </nav>
     </div>
