@@ -80,17 +80,14 @@ export default function CardBattle({ onBack }: { onBack: () => void }) {
     m.hp = m.hp + lvl * 30; m.atk = m.atk + lvl * 2;
     setMonster(m); setMHP(m.hp);
 
-    const allCn = [...new Set(wData.map((r: any) => r.chinese))];
-    const allWd = [...new Set(wData.map((r: any) => r.word))];
+    const allWd = [...new Set(wData.map((r: any) => r.word as string))];
     const qs: Q[] = wData.map((w: any) => {
       const attr: Attr = (['fire','water','wood'] as Attr[])[Math.floor(Math.random() * 3)];
       const rarity = pickRarity();
       const listen = Math.random() < 0.5;
-      const correct = listen ? w.chinese : w.word;
-      const pool = listen ? allCn : allWd;
-      const distractors = shuffle(pool.filter((x: string) => x !== correct)).slice(0, 3);
-      const options = shuffle(distractors.concat(correct));
-      return { word: w.word, chinese: w.chinese, listen, options, attr, rarity, correct };
+      const distractors: string[] = shuffle(allWd.filter((x: string) => x !== w.word)).slice(0, 3);
+      const options: string[] = shuffle(distractors.concat(w.word));
+      return { word: w.word, chinese: w.chinese, listen, options, attr, rarity, correct: w.word };
     });
     setQuestions(qs); setTotal(qs.length); setCurr(0); setScore(0); setCombo(0);
     setPHP(100); setPhase('battle');
@@ -211,7 +208,7 @@ export default function CardBattle({ onBack }: { onBack: () => void }) {
             ) : (
               <div className="cb-card-word">{q.chinese}</div>
             )}
-            <div className="cb-card-hint">{q.listen ? '🎧 聽音選義（播單字 → 選中文）' : '🔍 看義選詞（顯中文 → 選單字）'}</div>
+            <div className="cb-card-hint">{q.listen ? '🎧 聽音選字（播單字 → 選英文）' : '🔍 看義選詞（顯中文 → 選英文）'}</div>
             {weak && <div className="cb-card-weak">弱點 ×2</div>}
           </div>
         )}
@@ -219,7 +216,7 @@ export default function CardBattle({ onBack }: { onBack: () => void }) {
 
       {/* ── 下：答題 ── */}
       <div className="cb-actions">
-        <div className="cb-prompt">{q.listen ? '這個單字的意思是？' : '哪個英文單字的意思是這個？'}</div>
+        <div className="cb-prompt">{q.listen ? '聽！哪個英文單字是這個發音？' : '哪個英文單字的意思是這個？'}</div>
         <div className="cb-opts">
           {q?.options.map((o, i) => (
             <button key={i} className={`cb-opt ${chosen === o ? (o === q.correct ? 'cb-opt-ok' : 'cb-opt-ng') : ''} ${chosen && o === q.correct ? 'cb-opt-ok' : ''}`}
