@@ -261,7 +261,7 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
     const sb = supabase();
     if (sb) {
       const { error } = await sb.from("scores").insert({
-        name: name.trim(),
+        name: name.trim().slice(0, 10),
         grade: Number(grade),
         week: Number(week),
         qtype: listen ? "listen" : "wordpick",
@@ -407,8 +407,8 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
           <h2 className="qz-title">📝 準備開始</h2>
           {err && <div className="qz-error">{err}</div>}
           <div className="qz-field">
-            <label>姓名（顯示在成績板{accountName ? "，預設為您的帳號" : ""}）</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="例如：王小明" />
+            <label>姓名（顯示在成績板{accountName ? "，預設為您的帳號" : ""}，最多 10 字）</label>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="例如：王小明" maxLength={10} />
           </div>
           <div className="qz-grid2">
             <div className="qz-field">
