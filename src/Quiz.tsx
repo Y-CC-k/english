@@ -36,6 +36,7 @@ interface ScoreRow {
   week: number;
   qtype: string | null;
   score: number;
+  total?: number;
   created_at: string;
 }
 
@@ -51,9 +52,11 @@ interface BoardSummary {
   name: string;
   grade: number;
   attempts: number;
-  best: number;
-  average: number;
-  lastAt: string; // 最後一次考試時間（ISO）
+  best: number;      // 最佳答對題數
+  bestTotal: number; // 最佳那場的總題數（答對率排行＝best/bestTotal）
+  average: number;   // 累計答對題數（答對率排行顯示「對/全部」＝average/sumTotal）
+  sumTotal: number;  // 累計總題數
+  lastAt: string;    // 最後一次考試時間（ISO）
 }
 
 const GRADES = [
@@ -250,6 +253,7 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
         week: Number(week),
         qtype: listen ? "listen" : "wordpick",
         score: finalScore,
+        total: questions.length, // 總題數（成績板算答對率「對/全部」用）
         detail: detailRef.current,
         ...(ip ? { ip } : {}), // 本機公網 IP（抓不到就略過）
       });
@@ -279,7 +283,7 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
     if (!sb) return;
     setLoading(true);
     try {
-      let query = sb.from("scores").select("name, grade, week, qtype, score, created_at");
+      let query = sb.from("scores").select("name, grade, week, qtype, score, total, created_at");
       if (g) query = query.eq("grade", Number(g));
       if (w) query = query.eq("week", Number(w));
       if (t) query = query.eq("qtype", t);
@@ -293,18 +297,19 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
       setBWeeks([...new Set(unwrap<{ week: number }>(await wq).map((r) => r.week))].sort((a, b) => a - b));
 
       // 聚合：依 姓名+年級 分組（紀錄已依時間新→舊排序，第一筆即最後一次考試）
-      const map = new Map<string, BoardSummary & { sum: number }>();
+      const map = new Map<string, BoardSummary>();
       for (const r of rows) {
         const key = `${r.name}|${r.grade}`;
-        const e = map.get(key) ?? { name: r.name, grade: r.grade, attempts: 0, best: 0, average: 0, lastAt: "", sum: 0 };
+        const tot = r.total ?? 0;
+        const e = map.get(key) ?? { name: r.name, grade: r.grade, attempts: 0, best: 0, bestTotal: 0, average: 0, sumTotal: 0, lastAt: "" };
         e.attempts++;
-        e.best = Math.max(e.best, r.score);
-        e.sum += r.score;
-        e.average = Math.round((e.sum / e.attempts) * 10) / 10;
+        if (r.score > e.best || (r.score === e.best && tot > e.bestTotal)) { e.best = r.score; e.bestTotal = tot; }
+        e.average += r.score; // 先當累計答對數，最後顯示「對/全部」
+        e.sumTotal += tot;
         if (!e.lastAt) e.lastAt = r.created_at;
         map.set(key, e);
       }
-      setSummary([...map.values()].map(({ sum: _sum, ...s }) => s));
+      setSummary([...map.values()]);
 
       // 老師專區（SQL 函式本身會驗身分，非老師回 0 筆）
       if (teacher) {
@@ -327,16 +332,22 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
+  /** 答對率（同分丟給排序當次要條件）：最佳那場 best/bestTotal；平均＝累計對/累計全部 */
+  const bestRate = (s: BoardSummary) => (s.bestTotal ? s.best / s.bestTotal : s.best);
+  const avgRate = (s: BoardSummary) => (s.sumTotal ? s.average / s.sumTotal : s.average);
+
   const sortedSummary = [...summary].sort((a, b) => {
     switch (bSort) {
-      case "average":  return b.average - a.average || b.best - a.best;
-      case "attempts": return b.attempts - a.attempts || b.best - a.best;
+      case "average":  return avgRate(b) - avgRate(a) || bestRate(b) - bestRate(a);
+      case "attempts": return b.attempts - a.attempts || bestRate(b) - bestRate(a);
       case "name":     return a.name.localeCompare(b.name, "zh-Hant");
-      case "latest":   return new Date(b.lastAt).getTime() - new Date(a.lastAt).getTime() || b.best - a.best;
-      case "oldest":   return new Date(a.lastAt).getTime() - new Date(b.lastAt).getTime() || b.best - a.best;
-      default:         return b.best - a.best || b.average - a.average;
+      case "latest":   return new Date(b.lastAt).getTime() - new Date(a.lastAt).getTime() || bestRate(b) - bestRate(a);
+      case "oldest":   return new Date(a.lastAt).getTime() - new Date(b.lastAt).getTime() || bestRate(b) - bestRate(a);
+      default:         return bestRate(b) - bestRate(a) || avgRate(b) - avgRate(a);
     }
   });
+  // 顯示用：最佳「對/全部」
+  const fmtFrac = (n: number, d: number) => (d ? `${n}/${d}` : `${n}`);
 
   /* ── 結果頁遊戲化元素 ── */
   const correctCount = detail.filter((d) => d.correct).length;
@@ -572,8 +583,8 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
                     <td>{s.name}{s.name === name.trim() ? "（我）" : ""}</td>
                     {!bGrade && <td className="num">{s.grade}</td>}
                     <td className="num">{s.attempts}</td>
-                    <td className="num">{s.best}</td>
-                    <td className="num">{s.average}</td>
+                    <td className="num">{fmtFrac(s.best, s.bestTotal)}</td>
+                    <td className="num">{fmtFrac(s.average, s.sumTotal)}</td>
                     <td className="num">{fmtDateTime(s.lastAt)}</td>
                   </tr>
                 ))}
@@ -597,7 +608,7 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
                     <td className="num">{r.grade}</td>
                     <td className="num">第 {r.week} 週</td>
                     <td>{r.qtype ? QTYPE_LABEL[r.qtype] ?? r.qtype : "—"}</td>
-                    <td className="num">{r.score}</td>
+                    <td className="num">{r.total ? `${r.score} / ${r.total}` : r.score}</td>
                   </tr>
                 ))}
                 {recent.length === 0 && !loading && (
@@ -623,7 +634,7 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
                         <td className="num">{r.grade}</td>
                         <td className="num">第 {r.week} 週</td>
                         <td>{r.qtype ? QTYPE_LABEL[r.qtype] ?? r.qtype : "—"}</td>
-                        <td className="num">{r.score}</td>
+                        <td className="num">{r.total ? `${r.score} / ${r.total}` : r.score}</td>
                         <td className="num">{r.ip ?? "—"}</td>
                         <td>
                           <button

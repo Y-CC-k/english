@@ -7,6 +7,7 @@ interface Row {
   week: number;
   qtype: string | null;
   score: number;
+  total?: number;
 }
 
 const MEDALS = ["🥇", "🥈", "🥉"];
@@ -27,14 +28,18 @@ export default function Leaderboard() {
     setLoading(true);
     void (async () => {
       try {
-        let query = sb.from("scores").select("name, grade, week, qtype, score");
+        let query = sb.from("scores").select("name, grade, week, qtype, score, total");
         if (grade) query = query.eq("grade", Number(grade));
         if (week) query = query.eq("week", Number(week));
         if (bType) query = query.eq("qtype", bType);
-        query = query.order("score", { ascending: false }).order("created_at", { ascending: false }).limit(10);
+        query = query.order("score", { ascending: false }).order("created_at", { ascending: false }).limit(30);
         const { data, error } = await query;
         if (!alive) return;
-        setRows(error ? [] : (data ?? []));
+        // 答對率排行：答對率 = score / total（取前 10 名）
+        const sorted = [...(data ?? [])].sort((a, b) =>
+          (b.score / (b.total ?? 10)) - (a.score / (a.total ?? 10)) || (b.total ?? 0) - (a.total ?? 0)
+        ).slice(0, 10);
+        setRows(error ? [] : sorted);
 
         // 週次選單：該年級實際有紀錄的週（不受週次篩選影響）
         let wq = sb.from("scores").select("week");
@@ -85,7 +90,7 @@ export default function Leaderboard() {
               <b className="lb-name">{r.name}</b>
               <span className="lb-meta">{r.grade} 年級 · 第 {r.week} 週</span>
               {r.qtype && <span className="lb-qtype">{r.qtype === "listen" ? "🎧 聽音選義" : "🔍 看義選詞"}</span>}
-              <span className="lb-score">{r.score} 分</span>
+              <span className="lb-score">{r.total ? `${r.score}/${r.total}` : `${r.score} 分`}</span>
             </li>
           ))}
         </ol>
