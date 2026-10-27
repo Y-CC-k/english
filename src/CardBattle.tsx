@@ -196,8 +196,8 @@ export default function CardBattle({ onBack }: { onBack: () => void }) {
               <span className="cb-card-attr">{ATTR_EMOJI[q.attr]}</span>
               <span className="cb-card-rarity">{RARITY_LABEL[q.rarity]}</span>
             </div>
-            <div className="cb-card-word">{q.word}</div>
-            <div className="cb-card-pos">{q.chinese}</div>
+            <div className="cb-card-word">{q.listen ? q.word : q.chinese}</div>
+            <div className="cb-card-pos">{q.listen ? q.chinese : ''}</div>
             <div className="cb-card-hint">{q.listen ? '🎧 聽音選義' : '🔍 看義選詞'}</div>
             {weak && <div className="cb-card-weak">弱點 ×2</div>}
           </div>
@@ -206,7 +206,7 @@ export default function CardBattle({ onBack }: { onBack: () => void }) {
 
       {/* ── 下：答題 ── */}
       <div className="cb-actions">
-        <div className="cb-prompt">這個單字的意思是？</div>
+        <div className="cb-prompt">{q.listen ? '這個單字的意思是？' : '哪個英文單字的意思是這個？'}</div>
         <div className="cb-opts">
           {q?.options.map((o, i) => (
             <button key={i} className={`cb-opt ${chosen === o ? (o === q.correct ? 'cb-opt-ok' : 'cb-opt-ng') : ''} ${chosen && o === q.correct ? 'cb-opt-ok' : ''}`}
