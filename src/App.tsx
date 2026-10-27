@@ -67,7 +67,7 @@ export default function App() {
     );
     if (view === 'battle') return <Battle onBack={() => setView('study')} />;
     switch (view) {
-      case 'study': return <WordStudy key="study" onBack={() => setView('quiz')} />;
+      case 'study': return <WordStudy key="study" />;
       case 'quiz': return (
         <Quiz
           key="quiz"
@@ -88,7 +88,7 @@ export default function App() {
           initialBoard={true}
         />
       );
-      default: return <WordStudy key="study" onBack={() => setView('quiz')} />;
+      default: return <WordStudy key="study" />;
     }
   };
 

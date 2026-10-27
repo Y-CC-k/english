@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "./lib/supabase";
-import { signOut } from "./lib/auth";
 import {
   speakSequence,
   stopSpeech,
@@ -31,7 +30,7 @@ const GRADES = [
 
 const FAV_KEY = "ws-fav-words"; // 我的單字最愛（存在本機裝置）
 
-export default function WordStudy({ onBack }: { onBack: () => void }) {
+export default function WordStudy() {
   const [grade, setGrade] = useState("");
   const [week, setWeek] = useState("");
   const [weekOptions, setWeekOptions] = useState<number[]>([]);
@@ -179,22 +178,6 @@ export default function WordStudy({ onBack }: { onBack: () => void }) {
         <div className="ws-orb ws-orb-3" />
         <div className="ws-orb ws-orb-4" />
       </div>
-
-      <header className="ws-header" role="banner">
-        <div className="ws-header-content">
-          <div className="ws-header-brand">
-            <img className="ws-header-logo-img" src="school-logo.png" alt="槺榔國小校徽" aria-hidden="true" />
-            <div>
-              <h1 className="ws-header-title">國小英文單字學習網</h1>
-              <p className="ws-header-subtitle">1200 英語單字 · 教學模式 · Supabase words</p>
-            </div>
-          </div>
-          <div className="ws-header-actions">
-            <button className="ws-logout-btn" onClick={() => void signOut()}>登出</button>
-            <button className="ws-back-btn" onClick={onBack}>← 返回</button>
-          </div>
-        </div>
-      </header>
 
       <div className="ws-controls">
         <div className="ws-select-group">
