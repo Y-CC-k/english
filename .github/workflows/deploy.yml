@@ -30,9 +30,9 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          # 這些是「公開」 publishable 金鑰，設計上可放進前端 bundle（配 RLS 管內容）
-          VITE_SUPABASE_URL: https://uhunwwvjzuaauklzzuwk.supabase.co
-          VITE_SUPABASE_ANON_KEY: sb_publishable_hxvVG4tC6-r-ZMge_5lLpQ_eiHArMyh
+          # 改用 GitHub Secrets 管理，避免明文出現在 workflow YAML
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
