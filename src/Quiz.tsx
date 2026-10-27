@@ -195,12 +195,9 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
     if (weekSubset.length === 0) { setErr("這一週沒有單字，換一週試試"); return; }
     const n = count === "all" ? weekSubset.length : Math.min(Number(count), weekSubset.length);
     // 取樣 N 題；干擾項：聽音題用「不同中文」、看義題用「同池不同單字」
-    const allChinese = [...new Set(pool.map((r) => r.chinese))];
     const allWords = [...new Set(pool.map((r) => r.word))];
     const qs: Question[] = shuffle(weekSubset).slice(0, n).map((w) => {
-      const d = listen
-        ? shuffle(allChinese.filter((c) => c !== w.chinese)).slice(0, 3).concat(w.chinese)
-        : shuffle(allWords.filter((x) => x !== w.word)).slice(0, 3).concat(w.word);
+      const d = shuffle(allWords.filter((x) => x !== w.word)).slice(0, 3).concat(w.word);
       return {
         word: w.word,
         chinese: w.chinese,
@@ -236,7 +233,7 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
   /* ── 作答 ─────────────────────────────── */
   function answer(option: string) {
     if (chosen !== null || !q) return;
-    const correct = option === (q.listen ? q.chinese : q.word);
+    const correct = option === q.word;
     setChosen(option);
     const item: DetailItem = { word: q.word, chinese: q.chinese, chosen: option, correct };
     setDetail((d) => [...d, item]);
@@ -466,7 +463,7 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
             {q.listen ? (
               <>
                 <button className="qz-play-big" onClick={() => speakWord(q.word, 0.75)} aria-label="播放單字">▶</button>
-                <span className="qz-prompt-hint">🎧 聽！這個單字的意思是？
+                <span className="qz-prompt-hint">🎧 聽！哪個英文單字是這個發音？
                   （點 ▶ 可以重聽）</span>
               </>
             ) : (
@@ -478,7 +475,7 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
           </div>
           <div className="qz-options">
             {q.options.map((o) => {
-              const ans = q.listen ? q.chinese : q.word;
+              const ans = q.word;
               const cls =
                 chosen === null ? "" : o === ans ? "correct" : o === chosen ? "wrong" : "";
               return (
