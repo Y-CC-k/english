@@ -95,6 +95,18 @@
 .cb-card-rarity { font-size: 12px; font-weight: 900; padding: 2px 8px; border-radius: 999px; background: rgba(255,215,0,.18); color: var(--cb-gold2); border: 1px solid rgba(255,215,0,.4); }
 .cb-card-ssr .cb-card-rarity { background: rgba(255,215,0,.35); color: #fff; }
 .cb-card-word { font-size: clamp(22px, 4.5vw, 30px); font-weight: 900; color: #fff; letter-spacing: 1px; margin: 6px 0; }
+.cb-play {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 76px; height: 76px; margin: 8px auto;
+  font-size: 34px; line-height: 1;
+  border: 3px solid var(--cb-gold); border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #3a2a60, #1a1030);
+  color: var(--cb-gold2); cursor: pointer;
+  box-shadow: 0 0 18px rgba(255,215,0,.45);
+  transition: transform .15s, box-shadow .15s;
+}
+.cb-play:hover { transform: scale(1.08); box-shadow: 0 0 24px rgba(255,215,0,.65); }
+.cb-play:active { transform: scale(.95); }
 .cb-card-pos { font-size: 13px; color: #c9b8e8; }
 .cb-card-hint { font-size: 12px; color: #9b8bb8; margin-top: 4px; }
 .cb-card-weak { position: absolute; top: 8px; right: 8px; background: #ff4d6d; color: #fff; font-size: 11px; font-weight: 900; padding: 2px 8px; border-radius: 999px; animation: cb-pulse .8s infinite; }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
+import { speakWord, stopSpeech } from './lib/speak';
 import './CardBattle.css';
 
 type Attr = 'fire' | 'water' | 'wood';
@@ -57,6 +58,15 @@ export default function CardBattle({ onBack }: { onBack: () => void }) {
     }, 1500);
     return () => clearInterval(t);
   }, [phase]);
+
+  // 聽音題：進題自動播一次，並在卸載時停止
+  useEffect(() => {
+    if (phase !== 'battle' || !questions[curr] || !questions[curr].listen) return;
+    speakWord(questions[curr].word, 0.75);
+    return () => stopSpeech();
+  }, [phase, curr, questions]);
+
+  useEffect(() => () => stopSpeech(), []);
 
   async function startBattle() {
     if (!grade || !week) return;
@@ -196,9 +206,12 @@ export default function CardBattle({ onBack }: { onBack: () => void }) {
               <span className="cb-card-attr">{ATTR_EMOJI[q.attr]}</span>
               <span className="cb-card-rarity">{RARITY_LABEL[q.rarity]}</span>
             </div>
-            <div className="cb-card-word">{q.listen ? q.word : q.chinese}</div>
-            <div className="cb-card-pos">{q.listen ? q.chinese : ''}</div>
-            <div className="cb-card-hint">{q.listen ? '🎧 聽音選義' : '🔍 看義選詞'}</div>
+            {q.listen ? (
+              <button className="cb-play" onClick={() => speakWord(q.word, 0.75)} aria-label="播放單字">▶</button>
+            ) : (
+              <div className="cb-card-word">{q.chinese}</div>
+            )}
+            <div className="cb-card-hint">{q.listen ? '🎧 聽音選義（播單字 → 選中文）' : '🔍 看義選詞（顯中文 → 選單字）'}</div>
             {weak && <div className="cb-card-weak">弱點 ×2</div>}
           </div>
         )}
