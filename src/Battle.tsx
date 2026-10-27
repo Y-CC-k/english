@@ -47,15 +47,15 @@ export default function Battle({ grade: initGrade, week: initWeek, onBack }: { g
     const ty = monPosRef.current.y + 3;
     const tx = Math.max(monPosRef.current.x - 8, 8);
     at(0, () => { setHeroState("walk"); setHeroPos({ x: -8, y: ty }); });
-    at(60, () => setHeroPos({ x: tx, y: ty }));     // 衝過去（CSS transition 走路）
-    at(900, () => setHeroState("attack"));          // 揮劍！
-    at(1150, () => {                                // 命中：怪物變色＋傷害飄字
+    at(40, () => setHeroPos({ x: tx, y: ty }));     // 衝過去（CSS transition 走路）
+    at(750, () => setHeroState("attack"));          // 揮劍！
+    at(950, () => {                                 // 命中：怪物變色＋傷害飄字
       setMonHit(true);
       setDmg({ val: damage });
     });
-    at(1600, () => { setMonHit(false); setHeroState("back"); setHeroPos({ x: -15, y: ty }); });
-    at(2000, () => setDmg(null));
-    at(2600, () => setHeroState("hidden"));
+    at(1250, () => { setMonHit(false); setHeroState("back"); setHeroPos({ x: -15, y: ty }); });
+    at(1650, () => setDmg(null));
+    at(2000, () => setHeroState("hidden"));         // 2 秒整段收尾
   }
 
   useEffect(() => {
@@ -64,7 +64,17 @@ export default function Battle({ grade: initGrade, week: initWeek, onBack }: { g
       const sb = supabase();
       if (!sb) return;
 
-      const { data: mData } = await sb.from('monsters').select('*').limit(1).single();
+      // 開戰隨機抽一隻怪（年級越高越硬：HP+25/級、攻擊+1/級）
+      const { data: mList } = await sb.from('monsters').select('*');
+      const picked = mList && mList.length > 0
+        ? mList[Math.floor(Math.random() * mList.length)]
+        : null;
+      if (picked) {
+        const lvl = (grade ?? 3) - 3;
+        const m = { ...picked, max_hp: picked.max_hp + lvl * 25, attack_power: picked.attack_power + lvl };
+        setMonster(m);
+        setMHP(m.max_hp);
+      }
       const { data: wData } = await sb
         .from('words')
         .select('*')
@@ -72,7 +82,6 @@ export default function Battle({ grade: initGrade, week: initWeek, onBack }: { g
         .eq('week', week!)
         .limit(10);
 
-      if (mData) { setMonster(mData); setMHP(mData.max_hp); }
       if (wData && wData.length > 0) {
         // 自動生成選項（一個正確 + 三個隨機錯誤）
         const processed = wData.map(q => ({
