@@ -75,7 +75,7 @@ export default function Leaderboard() {
           </select>
           <select value={bType} onChange={(e) => setBType(e.target.value)}>
             <option value="">全部題型</option>
-            <option value="listen">🎧 聽音選義</option>
+            <option value="listen">🎧 聽音選字</option>
             <option value="wordpick">🔍 看義選詞</option>
           </select>
         </div>
@@ -89,7 +89,7 @@ export default function Leaderboard() {
               <span className="lb-rank">{MEDALS[i] ?? `${i + 1}.`}</span>
               <b className="lb-name">{r.name}</b>
               <span className="lb-meta">{r.grade} 年級 · 第 {r.week} 週</span>
-              {r.qtype && <span className="lb-qtype">{r.qtype === "listen" ? "🎧 聽音選義" : "🔍 看義選詞"}</span>}
+              {r.qtype && <span className="lb-qtype">{r.qtype === "listen" ? "🎧 聽音選字" : "🔍 看義選詞"}</span>}
               <span className="lb-score">{`${r.score}/${r.total ?? 10}`}</span>
             </li>
           ))}

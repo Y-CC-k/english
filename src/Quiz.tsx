@@ -18,7 +18,7 @@ interface WordRow {
 interface Question {
   word: string;      // 正解的英文單字
   chinese: string;   // 正解的中文
-  listen: boolean;   // true=聽音選義（播單字、選中文）；false=看義選詞（顯中文、選單字）
+  listen: boolean;   // true=聽音選字（播單字、選英文）；false=看義選詞（顯中文、選英文）
   options: string[]; // 選項（聽音=中文們／看義=單字們）
 }
 
@@ -40,7 +40,7 @@ interface ScoreRow {
   created_at: string;
 }
 
-const QTYPE_LABEL: Record<string, string> = { listen: "🎧 聽音選義", wordpick: "🔍 看義選詞" };
+const QTYPE_LABEL: Record<string, string> = { listen: "🎧 聽音選字", wordpick: "🔍 看義選詞" };
 
 /** ISO 時間 →「10/22 14:30」樣式（含日期與時間） */
 function fmtDateTime(iso: string): string {
@@ -385,7 +385,7 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
             <div>
               <h1 className="ws-header-title">評量活動{guest && "（🎮 訪客模式）"}</h1>
               <p className="ws-header-subtitle">
-                {guest ? "成績以你輸入的暱稱記錄" : "聽音選義／看義選詞 · 成績自動寫入 Supabase"}
+                {guest ? "成績以你輸入的暱稱記錄" : "聽音選字／看義選詞 · 成績自動寫入 Supabase"}
               </p>
             </div>
           </div>
@@ -434,7 +434,7 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
             <div className="qz-field">
               <label>題型</label>
               <select value={listen ? "listen" : "wordpick"} onChange={(e) => setListen(e.target.value === "listen")}>
-                <option value="listen">🎧 聽音選義（播單字 → 選中文）</option>
+                <option value="listen">🎧 聽音選字（播單字 → 選英文）</option>
                 <option value="wordpick">🔍 看義選詞（顯中文 → 選單字）</option>
               </select>
             </div>
@@ -568,7 +568,7 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
                 onChange={(e) => { setBType(e.target.value); void loadBoard(bGrade, bWeek, e.target.value); }}
               >
                 <option value="">全部題型</option>
-                <option value="listen">🎧 聽音選義</option>
+                <option value="listen">🎧 聽音選字</option>
                 <option value="wordpick">🔍 看義選詞</option>
               </select>
             </div>
