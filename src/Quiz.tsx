@@ -112,6 +112,10 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
   const [score, setScore] = useState(0);
   const [saveErr, setSaveErr] = useState("");
   const [finishAt, setFinishAt] = useState(""); // 本次交卷時間（顯示在結果頁）
+  // 錯誤加題：用 ref 記進度與總數（答錯時加一題重考），避免 setTimeout 讀到舊 state
+  const qIndexRef = useRef(0);
+  const qCountRef = useRef(0);
+  const origCountRef = useRef(0); // 原始題數（加題上限用）
 
   // 成績板
   const [summary, setSummary] = useState<BoardSummary[]>([]);
@@ -205,6 +209,9 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
       };
     });
     setQuestions(qs);
+    qIndexRef.current = 0;
+    qCountRef.current = qs.length;
+    origCountRef.current = qs.length;
     setQIndex(0);
     setChosen(null);
     setDetail([]);
@@ -235,9 +242,18 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
     setDetail((d) => [...d, item]);
     detailRef.current = [...detailRef.current, item];
     if (correct) setScore((s) => s + 1);
+    else {
+      // ❌ 錯誤加題：這個單字排到隊伍最後再考一次（上限＝原題數的 2 倍，避免無限加）
+      if (qCountRef.current < origCountRef.current * 2) {
+        const retry: Question = { word: q.word, chinese: q.chinese, listen: q.listen, options: shuffle(q.options) };
+        setQuestions((prev) => [...prev, retry]);
+        qCountRef.current += 1;
+      }
+    }
     nextTimer.current = window.setTimeout(() => {
       setChosen(null);
-      if (qIndex + 1 < questions.length) setQIndex((i) => i + 1);
+      qIndexRef.current += 1;
+      if (qIndexRef.current < qCountRef.current) setQIndex(qIndexRef.current);
       else void finish(detailRef.current.filter((x) => x.correct).length);
     }, 1200);
   }
@@ -253,7 +269,7 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
         week: Number(week),
         qtype: listen ? "listen" : "wordpick",
         score: finalScore,
-        total: questions.length, // 總題數（成績板算答對率「對/全部」用）
+        total: qCountRef.current, // 總題數＝原始題數＋答錯加題（成績板算答對率「對/全部」用）
         detail: detailRef.current,
         ...(ip ? { ip } : {}), // 本機公網 IP（抓不到就略過）
       });
