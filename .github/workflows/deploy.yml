@@ -30,9 +30,9 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          # 改用 GitHub Secrets 管理，避免明文出現在 workflow YAML
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          # 優先使用 GitHub Secrets；若尚未設定則退回公開 publishable 金鑰（網站仍可正常運作）
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://uhunwwvjzuaauklzzuwk.supabase.co' }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || 'sb_publishable_hxvVG4tC6-r-ZMge_5lLpQ_eiHArMyh' }}
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
