@@ -445,6 +445,14 @@ code {
   font-size: 19px;
 }
 
+/* 標題＋頁籤成同一組（頁籤緊接在標題右側） */
+.lb-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 /* 排行範圍頁籤（累計／今日） */
 .lb-tabs {
   display: flex;

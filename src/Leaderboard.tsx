@@ -68,10 +68,12 @@ export default function Leaderboard() {
   return (
     <div className="lb">
       <div className="lb-head">
-        <h2>{range === "today" ? "☀️ 今日排行榜" : "🏆 分數排行榜"}</h2>
-        <div className="lb-tabs">
-          <button className={range === "all" ? "lb-tab active" : "lb-tab"} onClick={() => setRange("all")}>🏆 累計排行</button>
-          <button className={range === "today" ? "lb-tab active" : "lb-tab"} onClick={() => setRange("today")}>☀️ 今日排名</button>
+        <div className="lb-title-row">
+          <h2>{range === "today" ? "☀️ 今日排行榜" : "🏆 分數排行榜"}</h2>
+          <div className="lb-tabs">
+            <button className={range === "all" ? "lb-tab active" : "lb-tab"} onClick={() => setRange("all")}>🏆 累計排行</button>
+            <button className={range === "today" ? "lb-tab active" : "lb-tab"} onClick={() => setRange("today")}>☀️ 今日排名</button>
+          </div>
         </div>
         <div className="lb-selects">
           <select value={grade} onChange={(e) => { setGrade(e.target.value); setWeek(""); }}>
