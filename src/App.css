@@ -445,6 +445,43 @@ code {
   font-size: 19px;
 }
 
+/* 排行範圍頁籤（累計／今日） */
+.lb-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.lb-tab {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 999px;
+  background: #fff;
+  color: #64748b;
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s, transform .1s;
+}
+
+.lb-tab:hover {
+  border-color: #94a3b8;
+  transform: translateY(-1px);
+}
+
+.lb-tab.active {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  border-color: #f59e0b;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, .35);
+}
+
+.lb-time {
+  font-size: 11px;
+  font-weight: 400;
+  opacity: .75;
+  margin-left: 2px;
+}
+
 .lb-selects {
   display: flex;
   gap: 8px;

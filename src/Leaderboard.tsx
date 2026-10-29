@@ -8,16 +8,18 @@ interface Row {
   qtype: string | null;
   score: number;
   total?: number;
+  created_at?: string;
 }
 
 const MEDALS = ["🥇", "🥈", "🥉"];
 
-/** 首頁分數排行榜：取前 10 高分（單場考試），同分以較新者在前；可選年級或年級＋週次。 */
+/** 首頁分數排行榜：答對率排行（依 score/total 排序，取前 10 名）；可切換「累計」或「今日」範圍，另可選年級／週次／題型。 */
 export default function Leaderboard() {
   const [grade, setGrade] = useState("");
   const [week, setWeek] = useState("");
   const [bWeeks, setBWeeks] = useState<number[]>([]);
   const [bType, setBType] = useState("");
+  const [range, setRange] = useState<"all" | "today">("all");
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,7 +30,13 @@ export default function Leaderboard() {
     setLoading(true);
     void (async () => {
       try {
-        let query = sb.from("scores").select("name, grade, week, qtype, score, total");
+        let query = sb.from("scores").select("name, grade, week, qtype, score, total, created_at");
+        if (range === "today") {
+          // 今天凌晨 0 點（本地時區）之後的成績
+          const now = new Date();
+          const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          query = query.gte("created_at", start.toISOString());
+        }
         if (grade) query = query.eq("grade", Number(grade));
         if (week) query = query.eq("week", Number(week));
         if (bType) query = query.eq("qtype", bType);
@@ -55,12 +63,16 @@ export default function Leaderboard() {
     return () => {
       alive = false;
     };
-  }, [grade, week, bType]);
+  }, [grade, week, bType, range]);
 
   return (
     <div className="lb">
       <div className="lb-head">
-        <h2>🏆 分數排行榜</h2>
+        <h2>{range === "today" ? "☀️ 今日排行榜" : "🏆 分數排行榜"}</h2>
+        <div className="lb-tabs">
+          <button className={range === "all" ? "lb-tab active" : "lb-tab"} onClick={() => setRange("all")}>🏆 累計排行</button>
+          <button className={range === "today" ? "lb-tab active" : "lb-tab"} onClick={() => setRange("today")}>☀️ 今日排名</button>
+        </div>
         <div className="lb-selects">
           <select value={grade} onChange={(e) => { setGrade(e.target.value); setWeek(""); }}>
             <option value="">全部年級</option>
@@ -81,7 +93,7 @@ export default function Leaderboard() {
         </div>
       </div>
       {rows.length === 0 ? (
-        <p className="lb-empty">{loading ? "載入中…" : "還沒有成績紀錄，去考一場吧！"}</p>
+        <p className="lb-empty">{loading ? "載入中…" : range === "today" ? "今天還沒有成績，去考一場吧！" : "還沒有成績紀錄，去考一場吧！"}</p>
       ) : (
         <ol className="lb-list">
           {rows.map((r, i) => (
@@ -90,7 +102,10 @@ export default function Leaderboard() {
               <b className="lb-name">{r.name}</b>
               <span className="lb-meta">{r.grade} 年級 · 第 {r.week} 週</span>
               {r.qtype && <span className="lb-qtype">{r.qtype === "listen" ? "🎧 聽音選字" : "🔍 看義選詞"}</span>}
-              <span className="lb-score">{`${r.score}/${r.total ?? 10}`}</span>
+              <span className="lb-score">
+                {`${r.score}/${r.total ?? 10}`}
+                {range === "today" && r.created_at && <span className="lb-time"> {new Date(r.created_at).toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" })}</span>}
+              </span>
             </li>
           ))}
         </ol>
