@@ -83,8 +83,7 @@ function unwrap<T>(result: { data: T[] | null; error: { message: string } | null
   return result.data ?? [];
 }
 
-export default function Quiz({ onBack, guest, accountName, teacher, initialBoard }: {
-  onBack: () => void;
+export default function Quiz({ guest, accountName, teacher, initialBoard }: {
   guest?: boolean;
   accountName?: string;
   teacher?: boolean;
@@ -389,16 +388,6 @@ export default function Quiz({ onBack, guest, accountName, teacher, initialBoard
               </p>
             </div>
           </div>
-          <button
-            className="ws-back-btn"
-            onClick={() => {
-              stopSpeech();
-              if (guest) void supabase()?.auth.signOut(); // 訪客離開即登出，下一位重新登入
-              onBack();
-            }}
-          >
-            ← {guest ? "離開訪客模式" : "返回"}
-          </button>
         </div>
       </header>
 

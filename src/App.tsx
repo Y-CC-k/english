@@ -73,8 +73,7 @@ export default function App() {
       case 'quiz': return (
         <Quiz
           key="quiz"
-          onBack={() => setView('quiz')}
-          guest={guestUser} 
+          guest={guestUser}
           accountName={guestUser ? undefined : (session?.user.email ?? undefined)}
           teacher={!guestUser && role === 1}
           initialBoard={false}
@@ -83,8 +82,7 @@ export default function App() {
       case 'board': return (
         <Quiz
           key="board"
-          onBack={() => setView('board')}
-          guest={guestUser} 
+          guest={guestUser}
           accountName={guestUser ? undefined : (session?.user.email ?? undefined)}
           teacher={!guestUser && role === 1}
           initialBoard={true}
