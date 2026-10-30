@@ -574,6 +574,46 @@ export default function Quiz({ guest, accountName, teacher, initialBoard }: {
             </div>
           </div>
           {err && <div className="qz-error">{err}</div>}
+
+          {teacher && (
+            <>
+              <h2 className="qz-title" style={{ marginTop: 8 }}>🛠️ 管理者專區（含 IP · 可刪除成績）</h2>
+              <div className="qz-table-wrap">
+                <table className="qz-table">
+                  <thead>
+                    <tr><th>時間</th><th>姓名</th><th>年級</th><th>週次</th><th>題型</th><th>分數</th><th>IP</th><th>操作</th></tr>
+                  </thead>
+                  <tbody>
+                    {teacherRows.map((r, i) => (
+                      <tr key={i}>
+                        <td className="num">{fmtDateTime(r.created_at)}</td>
+                        <td>{r.name}</td>
+                        <td className="num">{r.grade}</td>
+                        <td className="num">第 {r.week} 週</td>
+                        <td>{r.qtype ? QTYPE_LABEL[r.qtype] ?? r.qtype : "—"}</td>
+                        <td className="num">{`${r.score} / ${r.total ?? 10}`}</td>
+                        <td className="num">{r.ip ?? "—"}</td>
+                        <td>
+                          <button
+                            className="qz-ghost-btn"
+                            style={{ color: "#dc2626", borderColor: "#fecaca" }}
+                            disabled={deletingId === r.id}
+                            onClick={() => void removeScore(r)}
+                          >
+                            {deletingId === r.id ? "刪除中…" : "🗑️ 刪除"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {teacherRows.length === 0 && !loading && (
+                      <tr><td colSpan={8} className="qz-empty">沒有紀錄</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+
           <div className="qz-table-wrap">
             <table className="qz-table">
               <thead>
@@ -619,45 +659,6 @@ export default function Quiz({ guest, accountName, teacher, initialBoard }: {
               </tbody>
             </table>
           </div>
-
-          {teacher && (
-            <>
-              <h2 className="qz-title" style={{ marginTop: 8 }}>🛠️ 管理者專區（含 IP · 可刪除成績）</h2>
-              <div className="qz-table-wrap">
-                <table className="qz-table">
-                  <thead>
-                    <tr><th>時間</th><th>姓名</th><th>年級</th><th>週次</th><th>題型</th><th>分數</th><th>IP</th><th>操作</th></tr>
-                  </thead>
-                  <tbody>
-                    {teacherRows.map((r, i) => (
-                      <tr key={i}>
-                        <td className="num">{fmtDateTime(r.created_at)}</td>
-                        <td>{r.name}</td>
-                        <td className="num">{r.grade}</td>
-                        <td className="num">第 {r.week} 週</td>
-                        <td>{r.qtype ? QTYPE_LABEL[r.qtype] ?? r.qtype : "—"}</td>
-                        <td className="num">{`${r.score} / ${r.total ?? 10}`}</td>
-                        <td className="num">{r.ip ?? "—"}</td>
-                        <td>
-                          <button
-                            className="qz-ghost-btn"
-                            style={{ color: "#dc2626", borderColor: "#fecaca" }}
-                            disabled={deletingId === r.id}
-                            onClick={() => void removeScore(r)}
-                          >
-                            {deletingId === r.id ? "刪除中…" : "🗑️ 刪除"}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                    {teacherRows.length === 0 && !loading && (
-                      <tr><td colSpan={8} className="qz-empty">沒有紀錄</td></tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </>
-          )}
 
           <div className="qz-btn-row">
             <button className="qz-ghost-btn" onClick={() => setPhase("setup")}>← 回準備頁</button>

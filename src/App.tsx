@@ -101,7 +101,7 @@ export default function App() {
       <nav className="nav-menu">
         <button className={view === 'study' ? 'active' : ''} onClick={() => setView('study')}>📖 單字學習</button>
         <button className={view === 'quiz' ? 'active' : ''} onClick={() => setView('quiz')}>🎮 評量活動</button>
-        <button className={view === 'board' ? 'active' : ''} onClick={() => { setBattleParams(null); setView('board'); }}>📊 成績板</button>
+        <button className={view === 'board' ? 'active' : ''} onClick={() => { setBattleParams(null); setView('board'); }}>📊 成績板{role === 1 && !guestUser ? ' 🛠️' : ''}</button>
         <button className={view === 'battle' ? 'active' : ''} onClick={() => { setBattleParams(null); setView('battle'); }}>⚔️ 挑戰副本</button>
         <button className={view === 'cardbattle' ? 'active' : ''} onClick={() => { setBattleParams(null); setView('cardbattle'); }}>🃏 卡牌對戰</button>
         <button className="logout-btn" onClick={() => void signOut()}>登出</button>
