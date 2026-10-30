@@ -336,6 +336,9 @@ code {
 /* 🃏 卡牌對戰 Indigo */
 .nav-menu > button:nth-child(5) { color: #6d28d9; border-color: #ddd6fe; background: #f5f3ff; }
 
+/* 🛠️ 管理者（老師專屬，老師時才是第 6 顆；排除 logout-btn 以免學生版第 6 顆登出鈕被誤染色） */
+.nav-menu > button:not(.logout-btn):nth-child(6) { color: #d97706; border-color: #fde68a; background: #fffbeb; }
+
 /* 各功能專屬底色 */
 
 /* 目前所在的頁面 → 填色發亮 */
@@ -344,6 +347,7 @@ code {
 .nav-menu > button.active:nth-child(3) { background: #f59e0b; border-color: #f59e0b; color: #fff; }
 .nav-menu > button.active:nth-child(4) { background: #ef4444; border-color: #ef4444; color: #fff; }
 .nav-menu > button.active:nth-child(5) { background: #7c3aed; border-color: #7c3aed; color: #fff; }
+.nav-menu > button.active:not(.logout-btn):nth-child(6) { background: #f59e0b; border-color: #f59e0b; color: #fff; }
 
 .nav-menu > button:active { transform: translateY(0) scale(0.97); }
 

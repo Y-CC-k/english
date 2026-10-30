@@ -8,6 +8,7 @@ import WordStudy from "./WordStudy";
 import Quiz from "./Quiz";
 import Battle from "./Battle";
 import CardBattle from "./CardBattle";
+import AdminPanel from "./AdminPanel";
 
 /** 訪客模式共用帳號（Dashboard 手動建立；成績以暱稱記錄；密碼由使用者登入時輸入） */
 const GUEST_EMAIL = "klnes@stu.klnes.tc.edu.tw";
@@ -16,7 +17,7 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [battleParams, setBattleParams] = useState<{ grade: number, week: number } | null>(null);
   // 全域頁面狀態：study(單字), quiz(評量), board(成績), battle(副本)
-  const [view, setView] = useState<'study' | 'quiz' | 'board' | 'battle' | 'cardbattle'>('study');
+  const [view, setView] = useState<'study' | 'quiz' | 'board' | 'battle' | 'cardbattle' | 'admin'>('study');
   const [ready, setReady] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [role, setRole] = useState<number>(0); // profiles.role：0=學生 1=老師
@@ -68,6 +69,8 @@ export default function App() {
     );
     if (view === 'battle') return <Battle onBack={() => setView('study')} />;
     if (view === 'cardbattle') return <CardBattle onBack={() => setView('study')} />;
+    // 🛠️ 管理者專區：老師專屬獨立頁（身分別在 DB 端再驗一次）
+    if (view === 'admin') return <AdminPanel />;
     switch (view) {
       case 'study': return <WordStudy key="study" />;
       case 'quiz': return (
@@ -75,7 +78,6 @@ export default function App() {
           key="quiz"
           guest={guestUser}
           accountName={guestUser ? undefined : (session?.user.email ?? undefined)}
-          teacher={!guestUser && role === 1}
           initialBoard={false}
         />
       );
@@ -84,7 +86,6 @@ export default function App() {
           key="board"
           guest={guestUser}
           accountName={guestUser ? undefined : (session?.user.email ?? undefined)}
-          teacher={!guestUser && role === 1}
           initialBoard={true}
         />
       );
@@ -101,9 +102,12 @@ export default function App() {
       <nav className="nav-menu">
         <button className={view === 'study' ? 'active' : ''} onClick={() => setView('study')}>📖 單字學習</button>
         <button className={view === 'quiz' ? 'active' : ''} onClick={() => setView('quiz')}>🎮 評量活動</button>
-        <button className={view === 'board' ? 'active' : ''} onClick={() => { setBattleParams(null); setView('board'); }}>📊 成績板{role === 1 && !guestUser ? ' 🛠️' : ''}</button>
+        <button className={view === 'board' ? 'active' : ''} onClick={() => { setBattleParams(null); setView('board'); }}>📊 成績板</button>
         <button className={view === 'battle' ? 'active' : ''} onClick={() => { setBattleParams(null); setView('battle'); }}>⚔️ 挑戰副本</button>
         <button className={view === 'cardbattle' ? 'active' : ''} onClick={() => { setBattleParams(null); setView('cardbattle'); }}>🃏 卡牌對戰</button>
+        {role === 1 && !guestUser && (
+          <button className={view === 'admin' ? 'active' : ''} onClick={() => setView('admin')}>🛠️ 管理者</button>
+        )}
         <button className="logout-btn" onClick={() => void signOut()}>登出</button>
       </nav>
     </div>

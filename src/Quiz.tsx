@@ -83,10 +83,9 @@ function unwrap<T>(result: { data: T[] | null; error: { message: string } | null
   return result.data ?? [];
 }
 
-export default function Quiz({ guest, accountName, teacher, initialBoard }: {
+export default function Quiz({ guest, accountName, initialBoard }: {
   guest?: boolean;
   accountName?: string;
-  teacher?: boolean;
   initialBoard?: boolean;
 }) {
   const [phase, setPhase] = useState<Phase>(initialBoard ? "board" : "setup");
@@ -125,27 +124,6 @@ export default function Quiz({ guest, accountName, teacher, initialBoard }: {
   const [bType, setBType] = useState("");     // "" = 兩種題型都列
   const [bSort, setBSort] = useState("best"); // best / average / attempts / name / latest / oldest
   const nextTimer = useRef<number | null>(null);
-  // 老師專區：老師登入才另外抓含 IP 的完整紀錄（SQL 函式 teacher_scores 本身管權限）
-  const [teacherRows, setTeacherRows] = useState<(ScoreRow & { ip: string | null })[]>([]);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  /** 🛠️ 管理者刪除單筆成績（SQL 函式內驗 teacher 身分） */
-  async function removeScore(r: ScoreRow & { ip?: string | null }) {
-    const sb = supabase();
-    if (!r.id || !sb || deletingId) return;
-    if (!window.confirm(`確定要刪除「${r.name}（${r.grade} 年級・第 ${r.week} 週・${r.score} 分）」這筆成績嗎？`)) return;
-    setDeletingId(r.id);
-    try {
-      const { data, error } = await sb.rpc("delete_score", { p_id: r.id });
-      if (error) throw error;
-      if (!data) { setErr("刪除失敗：此帳號沒有管理者權限"); return; }
-      await loadBoard(bGrade, bWeek, bType); // 刪完重抓
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : String(e));
-    } finally {
-      setDeletingId(null);
-    }
-  }
 
   /* ── 取得本機公網 IP（成績記錄用；抓不到就留空，不影響作答） ── */
   const [ip, setIp] = useState("");
@@ -322,15 +300,6 @@ export default function Quiz({ guest, accountName, teacher, initialBoard }: {
         map.set(key, e);
       }
       setSummary([...map.values()]);
-
-      // 老師專區（SQL 函式本身會驗身分，非老師回 0 筆）
-      if (teacher) {
-        try {
-          setTeacherRows(unwrap<ScoreRow & { ip: string | null }>(await sb.rpc("teacher_scores")));
-        } catch {
-          setTeacherRows([]);
-        }
-      }
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     } finally {
@@ -574,45 +543,6 @@ export default function Quiz({ guest, accountName, teacher, initialBoard }: {
             </div>
           </div>
           {err && <div className="qz-error">{err}</div>}
-
-          {teacher && (
-            <>
-              <h2 className="qz-title" style={{ marginTop: 8 }}>🛠️ 管理者專區（含 IP · 可刪除成績）</h2>
-              <div className="qz-table-wrap">
-                <table className="qz-table">
-                  <thead>
-                    <tr><th>時間</th><th>姓名</th><th>年級</th><th>週次</th><th>題型</th><th>分數</th><th>IP</th><th>操作</th></tr>
-                  </thead>
-                  <tbody>
-                    {teacherRows.map((r, i) => (
-                      <tr key={i}>
-                        <td className="num">{fmtDateTime(r.created_at)}</td>
-                        <td>{r.name}</td>
-                        <td className="num">{r.grade}</td>
-                        <td className="num">第 {r.week} 週</td>
-                        <td>{r.qtype ? QTYPE_LABEL[r.qtype] ?? r.qtype : "—"}</td>
-                        <td className="num">{`${r.score} / ${r.total ?? 10}`}</td>
-                        <td className="num">{r.ip ?? "—"}</td>
-                        <td>
-                          <button
-                            className="qz-ghost-btn"
-                            style={{ color: "#dc2626", borderColor: "#fecaca" }}
-                            disabled={deletingId === r.id}
-                            onClick={() => void removeScore(r)}
-                          >
-                            {deletingId === r.id ? "刪除中…" : "🗑️ 刪除"}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                    {teacherRows.length === 0 && !loading && (
-                      <tr><td colSpan={8} className="qz-empty">沒有紀錄</td></tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </>
-          )}
 
           <div className="qz-table-wrap">
             <table className="qz-table">
