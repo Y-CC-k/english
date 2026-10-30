@@ -42,25 +42,97 @@
 }
 @keyframes floatUp { to { transform: translate(-50%, calc(-50% - 56px)); opacity: 0; } }
 
-/* 🤖 機器人：走路（左右滑移交給 transition）＋小跳步 */
+/* ─────────── 🤖 射箭機器人（完整的頭・身體・手・腳） ─────────── */
+/* 答對後：走出來 → 舉弓 → 拉弦 → 放箭 → 退場。零件全用 em，靠 .hero-bot 的 font-size 整體縮放 */
 .hero-bot {
   position: absolute; transform: translate(-50%, -50%);
-  font-size: clamp(40px, 7.5vw, 76px); z-index: 2; pointer-events: none;
-  transition: left .85s cubic-bezier(.4,.05,.6,1), top .85s cubic-bezier(.4,.05,.6,1);
+  z-index: 3; pointer-events: none;
+  font-size: clamp(9px, 1.6vw, 15px);
+  transition: left .62s cubic-bezier(.4,.05,.6,1), top .62s cubic-bezier(.4,.05,.6,1);
 }
-.hero-bot.walk, .hero-bot.back { animation: step .38s ease-in-out infinite; }
-@keyframes step { 0%,100% { margin-top: 0; } 50% { margin-top: -7px; } }
 
-/* 揮劍：手臂由上往下劈 */
-.hero-bot.attack > span {
-  display: inline-block; transform-origin: 78% 88%;
-  animation: slash .42s ease;
+.hb-robot {
+  position: relative; width: 2.4em; height: 4.1em;
+  filter: drop-shadow(0 .25em .3em rgba(0,0,0,.45));
+  transition: transform .2s ease;
 }
-@keyframes slash {
-  0%   { transform: rotate(-34deg); }
-  42%  { transform: rotate(16deg) translateX(10%); }
-  62%  { transform: rotate(6deg); }
-  100% { transform: rotate(0deg); }
+.aim .hb-robot, .draw .hb-robot { transform: rotate(-3deg); }   /* 舉弓時身體微後仰 */
+
+/* 天線（走路時紅燈閃爍） */
+.hb-ant { position: absolute; top: .1em; left: 1.12em; width: .12em; height: .38em; background: #aab6f7; }
+.hb-ant::after { content: ''; position: absolute; top: -.28em; left: -.09em; width: .3em; height: .3em; border-radius: 50%; background: #ff5d73; box-shadow: 0 0 .35em #ff5d73; }
+.walk .hb-ant::after, .back .hb-ant::after { animation: hbBlink .6s ease-in-out infinite; }
+@keyframes hbBlink { 50% { opacity: .25; } }
+
+/* 頭＋護目鏡臉＋發光眼睛 */
+.hb-head { position: absolute; top: .48em; left: .55em; width: 1.3em; height: 1.05em; background: linear-gradient(160deg, #ccd7ff, #8fa3e8); border-radius: .5em .5em .25em .25em; z-index: 2; }
+.hb-visor { position: absolute; top: .28em; left: .14em; width: 1.02em; height: .46em; background: #101a38; border-radius: .2em; }
+.hb-eye { position: absolute; top: .42em; width: .18em; height: .18em; border-radius: 50%; background: #7ff0ff; box-shadow: 0 0 .25em #7ff0ff; animation: hbEyeBlink 2.8s infinite; }
+.hb-eye.l { left: .28em; }
+.hb-eye.r { left: .78em; }
+@keyframes hbEyeBlink { 0%,94%,100% { transform: scaleY(1); } 97% { transform: scaleY(.15); } }
+
+/* 身體（胸口有發亮螢幕與指示燈） */
+.hb-body { position: absolute; top: 1.55em; left: .5em; width: 1.4em; height: 1.45em; background: linear-gradient(160deg, #6f86ff, #3d51c9); border-radius: .4em .4em .3em .3em; box-shadow: inset 0 -.18em 0 rgba(0,0,0,.25); z-index: 1; }
+.hb-body::after { content: ''; position: absolute; top: .35em; left: .24em; width: .92em; height: .55em; background: #0e1830; border-radius: .14em; box-shadow: inset 0 0 0 .05em #9ad2ff; }
+.hb-body::before { content: ''; position: absolute; bottom: .16em; left: .56em; width: .26em; height: .14em; background: #ffd166; border-radius: .07em; animation: hbBlink 1.4s infinite; }
+
+/* 雙腳（走路時前後交替擺動） */
+.hb-leg { position: absolute; bottom: 0; width: .3em; height: 1em; background: #5b6ee1; border-radius: .14em; transform-origin: top center; transition: transform .22s ease; }
+.hb-leg.l { left: .62em; }
+.hb-leg.r { left: 1.48em; }
+.hb-leg::after { content: ''; position: absolute; bottom: -.05em; left: -.1em; width: .5em; height: .28em; background: #394196; border-radius: .12em .12em .1em .1em; } /* 靴子 */
+.walk .hb-leg.l, .back .hb-leg.l { animation: hbLegA .3s ease-in-out infinite; }
+.walk .hb-leg.r, .back .hb-leg.r { animation: hbLegB .3s ease-in-out infinite; }
+@keyframes hbLegA { 0%,100% { transform: rotate(26deg); } 50% { transform: rotate(-22deg); } }
+@keyframes hbLegB { 0%,100% { transform: rotate(-22deg); } 50% { transform: rotate(26deg); } }
+.walk .hb-robot, .back .hb-robot { animation: hbBob .3s ease-in-out infinite; }
+@keyframes hbBob { 0%,100% { margin-top: 0; } 50% { margin-top: -.3em; } }
+
+/* 雙手：前手舉弓、後手拉弦（以 transform-origin 在肩膀處旋轉） */
+.hb-arm { position: absolute; top: 1.62em; width: .26em; height: .95em; background: #8fa3e8; border-radius: .13em; transform-origin: top center; transition: transform .2s ease; z-index: 2; }
+.hb-arm.f { left: 1.62em; transform: rotate(14deg); }   /* 前手（右手） */
+.hb-arm.b { left: .34em; transform: rotate(-16deg); }   /* 後手（左手，藏在身體後） */
+.aim .hb-arm.f, .draw .hb-arm.f, .shoot .hb-arm.f { transform: rotate(-88deg); }   /* 平舉指向怪物 */
+.draw .hb-arm.b { transform: rotate(-88deg) translateX(-.22em); }                  /* 後手拉弦 */
+.shoot .hb-arm.b { transform: rotate(20deg); transition-duration: .12s; }          /* 放弦瞬間彈開 */
+.shoot .hb-arm.f { animation: hbRecoil .3s ease; }                                 /* 弓臂後座力 */
+@keyframes hbRecoil { 0% { transform: rotate(-88deg); } 40% { transform: rotate(-70deg); } 100% { transform: rotate(-85deg); } }
+
+/* 射擊站姿：雙腳前後撐開 */
+.aim .hb-leg.l, .draw .hb-leg.l, .shoot .hb-leg.l { transform: rotate(9deg); }
+.aim .hb-leg.r, .draw .hb-leg.r, .shoot .hb-leg.r { transform: rotate(-7deg); }
+
+/* 背後箭袋（插著兩支備用箭） */
+.hb-quiver { position: absolute; top: 1.3em; left: -.02em; width: .42em; height: 1em; background: linear-gradient(160deg, #8a5a33, #6b4123); border-radius: .2em; transform: rotate(16deg); z-index: 0; }
+.hb-quiver::before, .hb-quiver::after { content: ''; position: absolute; top: -.45em; width: .07em; height: .6em; background: linear-gradient(180deg, #ffd166, #caa04c); }
+.hb-quiver::before { left: .06em; transform: rotate(-8deg); }
+.hb-quiver::after { left: .24em; transform: rotate(6deg); }
+
+/* 弓＋弦＋拉弦點＋上弦箭 */
+.hb-bow { position: absolute; left: 2.42em; top: 1em; width: .5em; height: 1.35em; border: .12em solid #e8b04b; border-left-color: transparent; border-radius: 50%; box-shadow: 0 0 .3em rgba(232,176,75,.3); transition: left .18s, top .18s, transform .18s; z-index: 3; }
+.walk .hb-bow, .back .hb-bow { left: 1.88em; top: 2.05em; transform: rotate(30deg); }  /* 走路時弓垂在身側 */
+.hb-string { position: absolute; left: -.06em; top: -.02em; width: .05em; height: 104%; background: rgba(255,255,255,.8); }
+.hb-pull { position: absolute; left: -.1em; top: 46%; width: .2em; height: .18em; border-radius: 50%; background: #ffe9a8; opacity: 0; transition: opacity .12s, transform .12s; }
+.draw .hb-pull { opacity: 1; transform: translateX(-.2em); }     /* 拉開弦 */
+.shoot .hb-pull { opacity: .6; transform: translateX(.02em); }
+.hb-nocked { position: absolute; top: calc(48% - .05em); left: -.06em; width: .92em; height: .1em; background: linear-gradient(90deg, #fff, #ffd166 68%, transparent 68%); clip-path: polygon(0 25%, 74% 25%, 74% 0, 100% 50%, 74% 100%, 74% 75%, 0 75%); opacity: 0; transition: opacity .12s; }
+.aim .hb-nocked, .draw .hb-nocked { opacity: 1; }                /* 弓上有箭 */
+.shoot .hb-nocked { opacity: 0; }
+
+/* 放箭瞬間的弓口亮光 */
+.hb-flash { position: absolute; left: 3.02em; top: 1.5em; width: .35em; height: .35em; border-radius: 50%; background: radial-gradient(circle, #fff8dc, #ffd166); box-shadow: 0 0 .5em #ffd166; opacity: 0; z-index: 3; }
+.shoot .hb-flash { animation: hbFlash .28s ease-out; }
+@keyframes hbFlash { 0% { opacity: 1; transform: scale(.4); } 100% { opacity: 0; transform: scale(1.9); } }
+
+/* ─────────── 飛行中的箭 ─────────── */
+.arrow-run {
+  position: absolute; z-index: 4; pointer-events: none;
+  width: clamp(24px, 4vw, 44px); height: .3em;
+  background: linear-gradient(90deg, #f6e6c8 0%, #ffd166 82%, transparent 82%);
+  clip-path: polygon(0 28%, 72% 28%, 72% 0, 100% 50%, 72% 100%, 72% 72%, 0 72%);
+  filter: drop-shadow(0 .06em .12em rgba(0,0,0,.4));
+  transition: left .25s linear, top .25s linear;
 }
 
 .shake { animation: shake .3s; }

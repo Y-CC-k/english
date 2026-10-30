@@ -21,17 +21,22 @@ export default function Battle({ grade: initGrade, week: initWeek, onBack }: { g
   const [monPos, setMonPos] = useState({ x: 50, y: 50 });
   const [monHit, setMonHit] = useState(false);
   const monPosRef = useRef({ x: 50, y: 45 });
-  // 🤖 機器人：答對後走出來砍怪的表演
-  const [heroState, setHeroState] = useState<"hidden" | "walk" | "attack" | "back">("hidden");
+  // 🤖 機器人：答對後走出來 → 舉弓拉弦 → 放箭殺怪的表演
+  const [heroState, setHeroState] = useState<"hidden" | "walk" | "aim" | "draw" | "shoot" | "back">("hidden");
   const [heroPos, setHeroPos] = useState({ x: -10, y: 60 });
   const heroSeqRef = useRef(0);
+  const heroActiveRef = useRef(false);
+  // 箭：從弓的位置飛向怪物（fly 後用 CSS transition 飛過去）
+  interface ArrowFly { x: number; y: number; dx: number; dy: number; ang: number; fly: boolean }
+  const [arrow, setArrow] = useState<ArrowFly | null>(null);
 
-  // 戰鬥中怪物到處跑（每 1.3 秒換一個隨機位置）
+  // 戰鬥中怪物到處跑（每 1.3 秒換一個隨機位置；機器人演出期間暫停亂跑，箭才打得準）
   useEffect(() => {
     if (phase !== 'battle') return;
     setMonPos({ x: 50, y: 45 });
     monPosRef.current = { x: 50, y: 45 };
     const t = setInterval(() => {
+      if (heroActiveRef.current) return;
       const p = { x: 15 + Math.random() * 70, y: 10 + Math.random() * 55 };
       monPosRef.current = p;
       setMonPos(p);
@@ -39,23 +44,36 @@ export default function Battle({ grade: initGrade, week: initWeek, onBack }: { g
     return () => clearInterval(t);
   }, [phase, curr]);
 
-  /** 答對演出：機器人走入戰場 → 衝到怪物旁 → 揮擊（命中＝變色＋傷害飄字）→ 退場 */
-  function robotAttack(damage: number) {
+  /** 答對演出：機器人走入戰場 → 站定射擊點 → 舉弓拉弦 → 放箭（命中＝變色＋傷害飄字）→ 退場 */
+  function robotShoot(damage: number) {
     const seq = ++heroSeqRef.current;               // 新演出開始 → 舊演出計時全部作廢
+    heroActiveRef.current = true;
     const at = (ms: number, fn: () => void) =>
-      window.setTimeout(() => { if (heroSeqRef.current === seq) fn(); }, ms);
-    const ty = monPosRef.current.y + 3;
-    const tx = Math.max(monPosRef.current.x - 8, 8);
-    at(0, () => { setHeroState("walk"); setHeroPos({ x: -8, y: ty }); });
-    at(40, () => setHeroPos({ x: tx, y: ty }));     // 衝過去（CSS transition 走路）
-    at(750, () => setHeroState("attack"));          // 揮劍！
-    at(950, () => {                                 // 命中：怪物變色＋傷害飄字
-      setMonHit(true);
-      setDmg({ val: damage });
+      window.setTimeout(() => {
+        if (heroSeqRef.current === seq) {
+          fn();
+          if (ms >= 2070) heroActiveRef.current = false;
+        }
+      }, ms);
+    const my = monPosRef.current.y + 4;             // 機器人站的高度（跟怪同一條地平線）
+    const mx = monPosRef.current.x;
+    const standX = Math.max(mx - 13, 5);            // 射擊定位點：怪左邊一段距離
+    const sx = standX + 3.4, sy = my - 2.2;         // 弓/箭起始位置（胸口高度）
+    const tx = mx, ty = monPosRef.current.y - 1.5;  // 箭目標：怪物中心
+    const ang = Math.atan2(ty - sy, tx - sx) * 180 / Math.PI;
+    at(0,   () => { setHeroState("walk"); setHeroPos({ x: -8, y: my }); });
+    at(40,  () => setHeroPos({ x: standX, y: my }));               // 走到射擊點（CSS transition）
+    at(600, () => setHeroState("aim"));                            // 站定，舉弓
+    at(760, () => setHeroState("draw"));                           // 拉弦
+    at(920, () => {                                                // 放箭！
+      setHeroState("shoot");
+      setArrow({ x: sx, y: sy, dx: tx - sx, dy: ty - sy, ang, fly: false });
     });
-    at(1250, () => { setMonHit(false); setHeroState("back"); setHeroPos({ x: -15, y: ty }); });
-    at(1650, () => setDmg(null));
-    at(2000, () => setHeroState("hidden"));         // 2 秒整段收尾
+    at(960,  () => setArrow(a => (a ? { ...a, fly: true } : a)));  // 箭朝怪物飛去
+    at(1210, () => { setMonHit(true); setDmg({ val: damage }); setArrow(null); }); // 命中：變色＋傷害飄字
+    at(1520, () => { setMonHit(false); setHeroState("back"); setHeroPos({ x: -14, y: my }); }); // 收弓退場
+    at(1750, () => setDmg(null));
+    at(2070, () => setHeroState("hidden"));         // 約 2 秒整段收尾
   }
 
   useEffect(() => {
@@ -144,8 +162,8 @@ export default function Battle({ grade: initGrade, week: initWeek, onBack }: { g
         if (next === 0) setPhase('victory');
         return next;
       });
-      // 🤖 機器人出擊演出的時候順便讓怪物變色割血
-      robotAttack(damage);
+      // 🤖 機器人射箭演出的時候順便讓怪物變色割血
+      robotShoot(damage);
     } else {
       setCombo(0);
       setShake(true);
@@ -187,8 +205,34 @@ export default function Battle({ grade: initGrade, week: initWeek, onBack }: { g
             </div>
             {heroState !== "hidden" && (
               <div className={`hero-bot ${heroState}`} style={{ left: `${heroPos.x}%`, top: `${heroPos.y}%` }}>
-                <span>🤖</span>
+                <div className="hb-robot">
+                  <div className="hb-ant" />
+                  <div className="hb-head">
+                    <div className="hb-visor" />
+                    <span className="hb-eye l" />
+                    <span className="hb-eye r" />
+                  </div>
+                  <div className="hb-arm b" />
+                  <div className="hb-quiver" />
+                  <div className="hb-body" />
+                  <div className="hb-arm f" />
+                  <div className="hb-bow">
+                    <div className="hb-string" />
+                    <div className="hb-pull" />
+                    <div className="hb-nocked" />
+                  </div>
+                  <div className="hb-leg l" />
+                  <div className="hb-leg r" />
+                  <div className="hb-flash" />
+                </div>
               </div>
+            )}
+            {arrow && (
+              <div className="arrow-run" style={{
+                left: `${arrow.x + (arrow.fly ? arrow.dx : 0)}%`,
+                top: `${arrow.y + (arrow.fly ? arrow.dy : 0)}%`,
+                transform: `translate(-50%, -50%) rotate(${arrow.ang}deg)`
+              }} />
             )}
             {dmg && <div className="damage-text" style={{ left: `${monPos.x}%`, top: `${monPos.y}%` }}>-{dmg.val}</div>}
           </div>
