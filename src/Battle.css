@@ -47,7 +47,7 @@
 .hero-bot {
   position: absolute; transform: translate(-50%, -50%);
   z-index: 3; pointer-events: none;
-  font-size: clamp(9px, 1.6vw, 15px);
+  font-size: clamp(14px, 2.6vw, 28px);      /* 放大整個機器人（零件全部等比縮放） */
   transition: left .62s cubic-bezier(.4,.05,.6,1), top .62s cubic-bezier(.4,.05,.6,1);
 }
 

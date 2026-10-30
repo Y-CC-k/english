@@ -58,7 +58,7 @@ export default function Battle({ grade: initGrade, week: initWeek, onBack }: { g
     const my = monPosRef.current.y + 4;             // 機器人站的高度（跟怪同一條地平線）
     const mx = monPosRef.current.x;
     const standX = Math.max(mx - 13, 5);            // 射擊定位點：怪左邊一段距離
-    const sx = standX + 3.4, sy = my - 2.2;         // 弓/箭起始位置（胸口高度）
+    const sx = standX + 4.6, sy = my - 3.2;         // 弓/箭起始位置（胸口高度）
     const tx = mx, ty = monPosRef.current.y - 1.5;  // 箭目標：怪物中心
     const ang = Math.atan2(ty - sy, tx - sx) * 180 / Math.PI;
     at(0,   () => { setHeroState("walk"); setHeroPos({ x: -8, y: my }); });
