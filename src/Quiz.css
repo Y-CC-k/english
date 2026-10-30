@@ -69,13 +69,25 @@
 
 .qz-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
-/* 成績板篩選列：年級／週次／排序 */
+/* 成績板篩選列：年級／週次／題型／起始日／結束日／排序 */
 .qz-board-controls {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 14px;
     margin: 10px 0 4px;
 }
+
+/* 管理者專區篩選列的日期輸入 */
+.qz-filters input[type="date"] {
+    padding: 6px 10px;
+    font-size: 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: #334155;
+    font-family: inherit;
+}
+.qz-filters input[type="date"]:disabled { opacity: .5; }
 
 .qz-empty {
     text-align: center;
@@ -286,6 +298,10 @@
 }
 .qz-badge.ok { background: rgba(46, 204, 113, 0.35); color: #c6ffb6; }
 .qz-badge.ng { background: rgba(231, 76, 60, 0.35); color: #ffc0b6; }
+
+@media (min-width: 769px) and (max-width: 1180px) {
+    .qz-board-controls { grid-template-columns: repeat(3, 1fr); }
+}
 
 @media (max-width: 768px) {
     .qz-panel { margin: 16px; padding: 20px; }

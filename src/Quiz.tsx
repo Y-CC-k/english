@@ -83,8 +83,7 @@ function unwrap<T>(result: { data: T[] | null; error: { message: string } | null
   return result.data ?? [];
 }
 
-export default function Quiz({ guest, accountName, initialBoard }: {
-  guest?: boolean;
+export default function Quiz({ accountName, initialBoard }: {
   accountName?: string;
   initialBoard?: boolean;
 }) {
@@ -122,6 +121,8 @@ export default function Quiz({ guest, accountName, initialBoard }: {
   const [bWeek, setBWeek] = useState("");     // "" = 全部週次
   const [bWeeks, setBWeeks] = useState<number[]>([]);
   const [bType, setBType] = useState("");     // "" = 兩種題型都列
+  const [bFrom, setBFrom] = useState("");     // 起始日（YYYY-MM-DD，空＝不限）
+  const [bTo, setBTo] = useState("");         // 結束日（空＝不限）
   const [bSort, setBSort] = useState("best"); // best / average / attempts / name / latest / oldest
   const nextTimer = useRef<number | null>(null);
 
@@ -267,8 +268,8 @@ export default function Quiz({ guest, accountName, initialBoard }: {
     setPhase("board");
   }
 
-  /** 依年級／週次／題型撈原始紀錄並在前端聚合（summary 聚合、recent 取最新 20 筆） */
-  async function loadBoard(g: string, w: string, t: string) {
+  /** 依年級／週次／題型／日期區間撈原始紀錄並在前端聚合（summary 聚合、recent 取最新 20 筆） */
+  async function loadBoard(g: string, w: string, t: string, from = "", to = "") {
     const sb = supabase();
     if (!sb) return;
     setLoading(true);
@@ -277,6 +278,9 @@ export default function Quiz({ guest, accountName, initialBoard }: {
       if (g) query = query.eq("grade", Number(g));
       if (w) query = query.eq("week", Number(w));
       if (t) query = query.eq("qtype", t);
+      // 日期區間（以本地時區的起日 00:00:00 ～ 訖日 23:59:59 篩）
+      if (from) query = query.gte("created_at", `${from}T00:00:00+08:00`);
+      if (to) query = query.lte("created_at", `${to}T23:59:59.999+08:00`);
       query = query.order("created_at", { ascending: false });
       const rows = unwrap<ScoreRow>(await query);
       setRecent(rows.slice(0, 20));
@@ -309,7 +313,7 @@ export default function Quiz({ guest, accountName, initialBoard }: {
 
   // 進成績板畫面時載入一次
   useEffect(() => {
-    if (phase === "board") void loadBoard(bGrade, bWeek, bType);
+    if (phase === "board") void loadBoard(bGrade, bWeek, bType, bFrom, bTo);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
@@ -345,20 +349,6 @@ export default function Quiz({ guest, accountName, initialBoard }: {
         <div className="ws-orb ws-orb-3" />
         <div className="ws-orb ws-orb-4" />
       </div>
-
-      <header className="ws-header">
-        <div className="ws-header-content">
-          <div className="ws-header-brand">
-            <div className="ws-header-logo" aria-hidden="true">Q</div>
-            <div>
-              <h1 className="ws-header-title">評量活動{guest && "（🎮 訪客模式）"}</h1>
-              <p className="ws-header-subtitle">
-                {guest ? "成績以你輸入的暱稱記錄" : "聽音選字／看義選詞 · 成績自動寫入 Supabase"}
-              </p>
-            </div>
-          </div>
-        </div>
-      </header>
 
       {phase === "setup" && (
         <div className="qz-panel">
@@ -498,7 +488,7 @@ export default function Quiz({ guest, accountName, initialBoard }: {
               <select
                 value={bGrade}
                 disabled={loading}
-                onChange={(e) => { setBGrade(e.target.value); setBWeek(""); void loadBoard(e.target.value, "", bType); }}
+                onChange={(e) => { setBGrade(e.target.value); setBWeek(""); void loadBoard(e.target.value, "", bType, bFrom, bTo); }}
               >
                 <option value="">全部年級</option>
                 <option value="3">三年級</option>
@@ -512,7 +502,7 @@ export default function Quiz({ guest, accountName, initialBoard }: {
               <select
                 value={bWeek}
                 disabled={loading}
-                onChange={(e) => { setBWeek(e.target.value); void loadBoard(bGrade, e.target.value, bType); }}
+                onChange={(e) => { setBWeek(e.target.value); void loadBoard(bGrade, e.target.value, bType, bFrom, bTo); }}
               >
                 <option value="">全部週次</option>
                 {bWeeks.map((n) => <option key={n} value={n}>第 {n} 週</option>)}
@@ -523,12 +513,22 @@ export default function Quiz({ guest, accountName, initialBoard }: {
               <select
                 value={bType}
                 disabled={loading}
-                onChange={(e) => { setBType(e.target.value); void loadBoard(bGrade, bWeek, e.target.value); }}
+                onChange={(e) => { setBType(e.target.value); void loadBoard(bGrade, bWeek, e.target.value, bFrom, bTo); }}
               >
                 <option value="">全部題型</option>
                 <option value="listen">🎧 聽音選字</option>
                 <option value="wordpick">🔍 看義選詞</option>
               </select>
+            </div>
+            <div className="qz-field">
+              <label>起始日</label>
+              <input type="date" value={bFrom} disabled={loading}
+                onChange={(e) => { setBFrom(e.target.value); void loadBoard(bGrade, bWeek, bType, e.target.value, bTo); }} />
+            </div>
+            <div className="qz-field">
+              <label>結束日</label>
+              <input type="date" value={bTo} disabled={loading}
+                onChange={(e) => { setBTo(e.target.value); void loadBoard(bGrade, bWeek, bType, bFrom, e.target.value); }} />
             </div>
             <div className="qz-field">
               <label>排序</label>

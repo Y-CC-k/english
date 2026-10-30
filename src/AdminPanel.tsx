@@ -32,6 +32,8 @@ export default function AdminPanel() {
   const [err, setErr] = useState("");
   const [bGrade, setBGrade] = useState("");
   const [bType, setBType] = useState("");
+  const [bFrom, setBFrom] = useState("");   // 起始日 YYYY-MM-DD（空＝不限）
+  const [bTo, setBTo] = useState("");       // 結束日（空＝不限）
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   async function load() {
@@ -71,8 +73,17 @@ export default function AdminPanel() {
     }
   }
 
+  // 日期區間（本地時區：起日 00:00:00 ～ 訖日 23:59:59）
+  const fromTs = bFrom ? Date.parse(`${bFrom}T00:00:00+08:00`) : Number.NEGATIVE_INFINITY;
+  const toTs = bTo ? Date.parse(`${bTo}T23:59:59.999+08:00`) : Number.POSITIVE_INFINITY;
+
   const filtered = rows
-    .filter(r => (!bGrade || r.grade === Number(bGrade)) && (!bType || r.qtype === bType))
+    .filter(r =>
+      (!bGrade || r.grade === Number(bGrade)) &&
+      (!bType || r.qtype === bType) &&
+      Date.parse(r.created_at) >= fromTs &&
+      Date.parse(r.created_at) <= toTs
+    )
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   return (
@@ -90,6 +101,12 @@ export default function AdminPanel() {
           <option value="listen">🎧 聽音選字</option>
           <option value="wordpick">🔍 看義選詞</option>
         </select>
+        <input type="date" value={bFrom} onChange={(e) => setBFrom(e.target.value)} aria-label="起始日" />
+        <input type="date" value={bTo} onChange={(e) => setBTo(e.target.value)} aria-label="結束日" />
+        <button className="qz-ghost-btn"
+          onClick={() => { setBFrom(""); setBTo(""); }}>
+          ✕ 清除日期
+        </button>
         <button className="qz-ghost-btn" onClick={() => void load()} disabled={loading}>
           🔄 重新整理
         </button>

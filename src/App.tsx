@@ -76,7 +76,6 @@ export default function App() {
       case 'quiz': return (
         <Quiz
           key="quiz"
-          guest={guestUser}
           accountName={guestUser ? undefined : (session?.user.email ?? undefined)}
           initialBoard={false}
         />
@@ -84,7 +83,6 @@ export default function App() {
       case 'board': return (
         <Quiz
           key="board"
-          guest={guestUser}
           accountName={guestUser ? undefined : (session?.user.email ?? undefined)}
           initialBoard={true}
         />
